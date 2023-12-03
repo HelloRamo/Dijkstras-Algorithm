@@ -47,35 +47,6 @@
         
             <script>
                 // Your existing JavaScript variables and functions (nodes, edges, etc.)
-        /*
-                document.getElementById('startButton').addEventListener('click', function() {
-                    let startNode = document.getElementById('startNodeInput').value;
-        
-                    // Validate the input
-                    if (!nodes[startNode]) {
-                        alert("Invalid start node!");
-                        return;
-                    }
-        
-                    // Run Dijkstra's algorithm
-                    const result = dijkstra(startNode);
-        
-                    // Existing code to draw the graph
-        
-                    // Create output text for the results
-                    let outputText = `<strong>Distances from ${startNode}:</strong><br>`;
-                    for (let node in result.distances) {
-                        outputText += `${node}: ${result.distances[node]}<br>`;
-                    }
-                    outputText += "<br><strong>Previous nodes:</strong><br>";
-                    for (let node in result.prev) {
-                        outputText += `${node}: ${result.prev[node]}<br>`;
-                    }
-                    
-                    // Display the results
-                    document.getElementById('outputDiv').innerHTML = outputText;
-                });
-        */
                 // Your existing Dijkstra's function here
             </script>
         </body>
@@ -96,13 +67,7 @@
                     H: { x: 550, y: 150 },
                     I: { x: 600, y: 450 },
                     J: { x: 750, y: 300 },
-                    /*
-                    K: { x: 450, y: 200 },  // Coordinates for new nodes K, L, M, N, O
-                    L: { x: 500, y: 350 },  // These are example coordinates and should be adjusted
-                    M: { x: 600, y: 200 },
-                    N: { x: 650, y: 350 },
-                    O: { x: 700, y: 250 }
-                    */
+
                 };
         
                 const edges = [
@@ -125,12 +90,7 @@
                     { from: 'G', to: 'D' },
                     { from: 'H', to: 'J' },
                     { from: 'I', to: 'J' },
-                    /*
-                    { from: 'K', to: 'L' },
-                    { from: 'L', to: 'M' },
-                    { from: 'M', to: 'N' },
-                    { from: 'N', to: 'O' },
-                    */
+
                 ];
         
                 edges.forEach(edge => {
@@ -194,19 +154,7 @@
                     ctx.font = '20px Arial';
                     ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
                 }
-
-                /*
-                                for (let node in result.distances) {
-                    outputText += `${node}: ${result.distances[node]}<br>`;
-                }
-                outputText += "<br><strong>Previous nodes:</strong><br>";
-                for (let node in result.prev) {
-                    outputText += `${node}: ${result.prev[node]}<br>`;
-                }
-                
-                outputDiv.innerHTML = outputText;
-                */
-            </script>
+   </script>
         </body>
         </html>  
 
@@ -362,7 +310,6 @@
     const startNode = 'A';
     const dijkstraResult = dijkstra(startNode);
     var correctDistances = result.distances;
-// var correctDistances = {'B': 11, 'C': 6, 'D': 9, 'E': 5, 'F': 12, 'G': 7, 'H': 4, 'I': 10, 'J': 2}; // Create a dictionary of correct distances for each node
 var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
 
 // This function verifies user input against the correct distances

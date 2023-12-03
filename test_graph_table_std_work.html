@@ -1,0 +1,36 @@
+// Test 1: Dijkstra's algorithm with a simple graph
+const graph1 = {
+    A: { B: 5, C: 2 },
+    B: { A: 5, C: 1, D: 3 },
+    C: { A: 2, B: 1, D: 6 },
+    D: { B: 3, C: 6 }
+};
+const startNode1 = 'A';
+const endNode1 = 'D';
+const result1 = dijkstra(graph1, startNode1, endNode1);
+console.log('Test 1 Result:', result1); // Expected output: ['A', 'C', 'B', 'D']
+
+// Test 2: Dijkstra's algorithm with a disconnected graph
+const graph2 = {
+    A: { B: 5, C: 2 },
+    B: { A: 5, C: 1 },
+    C: { A: 2, B: 1 },
+    D: { E: 3 },
+    E: { D: 3 }
+};
+const startNode2 = 'A';
+const endNode2 = 'E';
+const result2 = dijkstra(graph2, startNode2, endNode2);
+console.log('Test 2 Result:', result2); // Expected output: ['A', 'C', 'B', 'E']
+
+// Test 3: Dijkstra's algorithm with a graph containing negative weights
+const graph3 = {
+    A: { B: 5, C: 2 },
+    B: { A: 5, C: -1, D: 3 },
+    C: { A: 2, B: -1, D: 6 },
+    D: { B: 3, C: 6 }
+};
+const startNode3 = 'A';
+const endNode3 = 'D';
+const result3 = dijkstra(graph3, startNode3, endNode3);
+console.log('Test 3 Result:', result3); // Expected output: ['A', 'C', 'B', 'D']
