@@ -47,44 +47,45 @@
         
             <script>
                 // Your existing JavaScript variables and functions (nodes, edges, etc.)
-        /*
-                document.getElementById('startButton').addEventListener('click', function() {
-                    let startNode = document.getElementById('startNodeInput').value;
-        
-                    // Validate the input
-                    if (!nodes[startNode]) {
-                        alert("Invalid start node!");
-                        return;
-                    }
-        
-                    // Run Dijkstra's algorithm
-                    const result = dijkstra(startNode);
-        
-                    // Existing code to draw the graph
-        
-                    // Create output text for the results
-                    let outputText = `<strong>Distances from ${startNode}:</strong><br>`;
-                    for (let node in result.distances) {
-                        outputText += `${node}: ${result.distances[node]}<br>`;
-                    }
-                    outputText += "<br><strong>Previous nodes:</strong><br>";
-                    for (let node in result.prev) {
-                        outputText += `${node}: ${result.prev[node]}<br>`;
-                    }
-                    
-                    // Display the results
-                    document.getElementById('outputDiv').innerHTML = outputText;
-                });
-        */
                 // Your existing Dijkstra's function here
             </script>
         </body>
         </html>
-            <script>
+        
+   
+
+
+                <script>
                 let canvas = document.getElementById('graphCanvas');
                 let ctx = canvas.getContext('2d');
                 let outputDiv = document.getElementById('output');
-        
+
+                class PriorityQueue {
+                    constructor() {
+                        this.queue = [];
+                    }
+
+                    enqueue(element, priority) {
+                        this.queue.push({ element, priority });
+                        this.sort();
+                    }
+
+                    dequeue() {
+                        if (this.isEmpty()) {
+                            return "Queue is empty";
+                        }
+                        return this.queue.shift().element;
+                    }
+
+                    isEmpty() {
+                        return this.queue.length === 0;
+                    }
+
+                    sort() {
+                        this.queue.sort((a, b) => a.priority - b.priority);
+                    }
+                }
+
                 const nodes = {
                     A: { x: 150, y: 300 },
                     B: { x: 250, y: 150 },
@@ -96,15 +97,8 @@
                     H: { x: 550, y: 150 },
                     I: { x: 600, y: 450 },
                     J: { x: 750, y: 300 },
-                    /*
-                    K: { x: 450, y: 200 },  // Coordinates for new nodes K, L, M, N, O
-                    L: { x: 500, y: 350 },  // These are example coordinates and should be adjusted
-                    M: { x: 600, y: 200 },
-                    N: { x: 650, y: 350 },
-                    O: { x: 700, y: 250 }
-                    */
                 };
-        
+
                 const edges = [
                     { from: 'A', to: 'B' },
                     { from: 'A', to: 'C' },
@@ -125,90 +119,78 @@
                     { from: 'G', to: 'D' },
                     { from: 'H', to: 'J' },
                     { from: 'I', to: 'J' },
-                    /*
-                    { from: 'K', to: 'L' },
-                    { from: 'L', to: 'M' },
-                    { from: 'M', to: 'N' },
-                    { from: 'N', to: 'O' },
-                    */
                 ];
-        
+
                 edges.forEach(edge => {
-                    edge.weight = Math.floor(Math.random() * 31+1);
+                    edge.weight = Math.floor(Math.random() * 31 + 1);
                 });
+
                 function dijkstra(start) {
                     const distances = {};
-                    const visited = {};
                     const prev = {};
-                    const nodesArray = Object.keys(nodes);
-                    // Startbedingung
-                    nodesArray.forEach(node => {
+                    const priorityQueue = new PriorityQueue();
+
+                    Object.keys(nodes).forEach(node => {
                         distances[node] = Infinity;
-                        visited[node] = false;
+                        prev[node] = null;
                     });
-        
-                        distances[start] = 0;
-                    // Funktion für unbesuchte und nächste Knoten
-                    for (let i = 0; i < nodesArray.length; i++) {
-                        let unvisitedNodes = Object.keys(visited).filter(node => visited[node] === false);
-                        let nearestNode = unvisitedNodes.reduce((prev, curr) => distances[prev] <= distances[curr] ? prev : curr);
-        
-                        visited[nearestNode] = true;
-        
-                        edges.filter(edge => edge.from === nearestNode || edge.to === nearestNode).forEach(edge => {
-                            let otherNode = edge.from === nearestNode ? edge.to : edge.from;
-                            // 
-                            if (distances[nearestNode] + edge.weight < distances[otherNode]) {
-                                distances[otherNode] = distances[nearestNode] + edge.weight;
-                                prev[otherNode] = nearestNode;
+
+                    distances[start] = 0;
+                    priorityQueue.enqueue(start, 0);
+
+                    while (!priorityQueue.isEmpty()) {
+                        let current = priorityQueue.dequeue();
+
+                        edges.filter(edge => edge.from === current || edge.to === current).forEach(edge => {
+                            let otherNode = edge.from === current ? edge.to : edge.from;
+                            let weight = edge.weight;
+
+                            if (distances[current] + weight < distances[otherNode]) {
+                                distances[otherNode] = distances[current] + weight;
+                                prev[otherNode] = current;
+                                priorityQueue.enqueue(otherNode, distances[otherNode]);
                             }
                         });
                     }
-        
+
                     return { distances, prev };
                 }
-        // starting from A shortest path is stored in variable result
-                const result = dijkstra('A');
-                        // Drawing a line between two nodes to represent the edge.
-         
-        // midpoint edge outputs weight moveTo and lineTo methods are used to draw lines
-                edges.forEach(edge => {
-                    ctx.beginPath();
-                    ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
-                    ctx.lineTo(nodes[edge.to].x, nodes[edge.to].y);
-                    ctx.stroke();
-                    let midX = (nodes[edge.from].x + nodes[edge.to].x) / 2;
-                    let midY = (nodes[edge.from].y + nodes[edge.to].y) / 2;
-                    ctx.font = '20px Arial';
-                    ctx.fillText(edge.weight, midX, midY);
-                });
-        // drawing the nodes as circle
-                for (let node in nodes) {
-                            ctx.beginPath();
-                    ctx.arc(nodes[node].x, nodes[node].y, 20, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'white';
-                    ctx.fill();
-                    ctx.strokeStyle = 'black';
-                    ctx.stroke();
-                    ctx.fillStyle = 'black';
-                    ctx.font = '20px Arial';
-                    ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
-                }
 
-                /*
-                                for (let node in result.distances) {
-                    outputText += `${node}: ${result.distances[node]}<br>`;
-                }
-                outputText += "<br><strong>Previous nodes:</strong><br>";
-                for (let node in result.prev) {
-                    outputText += `${node}: ${result.prev[node]}<br>`;
-                }
+
+
+        // starting from A shortest path is stored in variable result
+        const result = dijkstra('A');
+        
+        // Drawing a line between two nodes to represent the edge.
+        edges.forEach(edge => {
+            ctx.beginPath();
+            ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
+            ctx.lineTo(nodes[edge.to].x, nodes[edge.to].y);
+            ctx.stroke();
+            let midX = (nodes[edge.from].x + nodes[edge.to].x) / 2;
+            let midY = (nodes[edge.from].y + nodes[edge.to].y) / 2;
+            ctx.font = '20px Arial';
+            ctx.fillText(edge.weight, midX, midY);
+        });
+        
+        // Drawing the nodes as circles
+        for (let node in nodes) {
+            ctx.beginPath();
+            ctx.arc(nodes[node].x, nodes[node].y, 20, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.stroke();
+            ctx.fillStyle = 'black';
+            ctx.font = '20px Arial';
+            ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
+        }
                 
-                outputDiv.innerHTML = outputText;
-                */
+
             </script>
-        </body>
-        </html>  
+          
+
+   
 
 
 <!DOCTYPE html>
@@ -362,7 +344,6 @@
     const startNode = 'A';
     const dijkstraResult = dijkstra(startNode);
     var correctDistances = result.distances;
-// var correctDistances = {'B': 11, 'C': 6, 'D': 9, 'E': 5, 'F': 12, 'G': 7, 'H': 4, 'I': 10, 'J': 2}; // Create a dictionary of correct distances for each node
 var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
 
 // This function verifies user input against the correct distances
