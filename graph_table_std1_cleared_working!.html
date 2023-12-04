@@ -11,7 +11,7 @@
         body {
             margin: 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
         }
         #graphContainer {
             flex-grow: 1;
@@ -20,36 +20,36 @@
             border: 1px solid black;
             width: 100%;
         }
-        #sideContainer {
-            width: 300px; /* Adjust the width as needed */
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: left;
-        }
+
         #output, #priorityQueueOutput {
             margin-top: 20px;
             font-family: Arial;
         }
 
-        #distanceTable, #distanceTable th, #distanceTable td { border: 1px solid black; border-collapse: collapse; padding: 15px; }
-        #distanceTable { 
+        #distanceTable, #distanceTable th, #distanceTable td { 
+            border: 1px solid black; 
+            border-collapse: collapse; 
+            padding: 15px; 
+            flex: 1;
             position: relative; /*  fixes the position of the element relative to the browser window */
             top: 10; /* Specifies distance from top of window */
             right: 50; /* Specifies distance from right of window */
             margin-bottom: 20px; 
         }
         
-        input { margin-right: 12px; }
         #canvasContainer {
             flex: 1;
         }
-        #tableContainer {
-            flex: 1;
-        }
+
         #mainContainer {
             display: flex;
             justify-content: center; /* Center the flex items horizontally */
             align-items: start; /* Align the flex items to the top */
+        }
+
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
         </style>
 
