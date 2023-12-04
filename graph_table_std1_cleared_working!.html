@@ -40,9 +40,9 @@
 </head>
 
 <body>
-    <div id="mainContainer"> // This div contains the graph and the table
+    <div id="mainContainer"> 
         <canvas id="graphCanvas" width="800" height="600"></canvas>
-        <div id="inputOutputContainer"> // This div contains the table and the output
+        <div id="inputOutputContainer"> 
             <div id="outputDiv"></div> 
         
             <script> // contains the graph and the table
@@ -89,29 +89,24 @@
                     edge.weight = Math.floor(Math.random() * 31 + 1);
                 });
        
-                  /*
-                    This code defines a class PriorityQueue and a function dijkstra for implementing Dijkstra's algorithm.
-                    The PriorityQueue class is used to store elements with their respective priorities and provides methods for enqueueing and dequeueing elements.
-                    The dijkstra function calculates the shortest distances from a given start node to all other nodes in a graph using Dijkstra's algorithm.
-                    It uses a priority queue to efficiently process nodes based on their distances.
-                    The function returns an object containing the calculated distances and the previous nodes in the shortest paths.   
-                 */
 
-                class PriorityQueue {
-                    constructor() {
+//========================================================================= Dijkstra PriorityQueue  ========================================================================================================
+
+                class PriorityQueue { 
+                    constructor() {     // constructor initializes an empty queue
                         this.queue = [];
                     }
 
-                    enqueue(element, priority) {
+                    enqueue(element, priority) {         // adds element to queue with a given priority and sorts them      
                         this.queue.push({ element, priority });
                         this.sort();
                     }
-
-                    dequeue() {
-                        if (this.isEmpty()) {
+                    
+                    dequeue() {     // removes the first element (highest priority) from array
+                        if (this.isEmpty()) {   // checks if queue is empty
                             return "Queue is empty";
                         }
-                        return this.queue.shift().element;
+                        return this.queue.shift().element; // removes first element
                     }
 
                     isEmpty() {

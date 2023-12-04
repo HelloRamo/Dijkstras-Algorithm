@@ -1,0 +1,1667 @@
+
+
+<!DOCTYPE html>
+<html lang="de">
+  
+<!-------------------------------------HEAD-------------------------------------------------------------------->  
+  <head>
+    
+    <meta charset="utf-8" />
+    <meta name = "viewport" content="width=device-width, initial-scale=1" /> 
+
+
+
+    <style>
+        /* CSS files add styling rules to your content */
+
+        body {
+        font-family: helvetica, arial, sans-serif;
+        margin: 2em;
+        }
+
+        button {
+            height: 30px;
+            width: 130px;
+            border-radius: 10px;
+            border: 1px solid black;
+            background-image: linear-gradient(to top, gainsboro 0%, white 90%);
+        }
+
+        input {
+            height: 26px;
+            width: 130px;
+            border-radius: 5px;
+            border: 1px solid black;
+            background-image: linear-gradient(to top, gainsboro 0%, white 90%);
+        }
+
+    </style>
+
+
+
+    <title>Robi - Tobi (Backtracking)</title>
+
+    <!-- Import the webpage's javascript file -->
+    
+    <script src = "./main.js" defer></script>    <!--  defer: Script ausführen, sobald das Dokument geladen ist -->
+    <script src = "./RobiTobiT.js"></script>
+
+    
+  </head>
+  
+<!-------------------------------------BODY-------------------------------------------------------------------->  
+  <body>
+    <h2> Robi - Tobi (Backtracking)</h2>
+    
+    <canvas id="leinwand" height="800" width="1600"></canvas>
+  
+    
+    <p>
+        
+      <label for="anzahlZeilen"><b> Anzahl der Zeilen (4-12):</b></label>
+      <input type="number" id="anzahlZeilen" name="anzahlZeilen" min="4" max="12" value="" >
+      
+      <label for="anzahlZeilen"><b> Anzahl der Spalten (4-12):</b></label>
+      <input type="number" id="anzahlSpalten" name="anzahlSpalten" min="4" max="12" value=""  >
+      
+      <label for="button1"><b>  </b></label>
+      <button onclick="FeldGenerieren()" id="button1" type="submit">   FELD GENERIEREN   </button> 
+      <button onclick="Neustarten()" id="button2" type="submit">       NEUSTARTEN        </button>
+      
+    </p> 
+    
+    <script>
+    // ==================================================================================== RobiTobiT ============================================================================
+    const LEER = 0;
+
+class RobiTobiT
+{
+  constructor(feldZ, feldS)
+  {  
+    // ----------------- Variable für aktuelle Quellcodenummer
+    this.quellcode = 1;
+    
+    // ----------------- Anzahl von Zeilen und Spalten definieren
+    this.feldZeilen = feldZ;
+    this.feldSpalten = feldS;
+
+    // ---------------- Startposition:
+    this.startZ = 0;
+    this.startS = 0;
+
+    /*-----------------------*/
+    /*   Kodierung:          */
+    /*   Leer = 0            */
+    /*   Wand = 9            */
+    /*   Betreten = 1        */
+    /*-----------------------*/
+    
+      // Beim Start (Ausgangssituation):   
+ /* 
+    	this.field = [ 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                   [ 0, 9, 9, 0, 9, 0, 0, 0, 0, 0, 0, 0],
+                   [ 0, 9, 0, 0, 9, 0, 9, 0, 0, 0, 0, 0],
+                   [ 9, 9, 9, 0, 9, 9, 9, 9, 9, 0, 0, 0],
+                   [ 0, 9, 0, 9, 9, 0, 0, 0, 0, 0, 0, 0], 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                   ];  
+    
+       this.fieldUnveraenderbar =  [ 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                   [ 0, 9, 9, 0, 9, 0, 0, 0, 0, 0, 0, 0],
+                                   [ 0, 9, 0, 0, 9, 0, 9, 0, 0, 0, 0, 0],
+                                   [ 9, 9, 9, 0, 9, 9, 9, 9, 9, 0, 0, 0],
+                                   [ 0, 9, 0, 9, 9, 0, 0, 0, 0, 0, 0, 0], 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                   ];
+*/ 
+    
+    // ----------- Variablen für den Feld anlegen:
+    this.field = new Array();
+    this.fieldUnveraenderbar = new Array();
+    
+    for(var i = 0; i<feldZ; i++)
+    {
+        this.field[i] = new Array();
+        this.fieldUnveraenderbar[i] = new Array();
+    }
+    
+ 
+    // ---------- Wände per Zufall erstellen:
+    var max = 0;
+    var wert = 0;   
+    var faktorDichte = 4;  // 1 ist sehr dicht und 10 ist gar nicht dicht. 5 ist OK
+    
+    for (var i = 0; i<feldS; i++)
+    {
+		  for (var j = 0; j<feldZ; j++)
+      {
+			  wert = Math.round(Math.random() * faktorDichte) + 0;
+        
+        if(wert == 1)
+        {
+          this.fieldUnveraenderbar[j][i] = 9;
+          this.field[j][i] = 9;
+        }
+        else
+        {
+          this.fieldUnveraenderbar[j][i] = 0;
+          this.field[j][i] = 0; 
+        }
+  		}
+	  }
+    
+    
+    
+    // -------------- Startpunkt per Zufall festlegen:
+    var nichtgefunden = true;
+    
+    while(nichtgefunden == true)
+    {
+       this.startZ = Math.round( Math.random() * (this.feldZeilen - 1) );
+       this.startS = Math.round( Math.random() * (this.feldSpalten - 1) );
+       if(this.field[this.startZ][this.startS] == 0)
+       {
+         nichtgefunden = false;
+       }  
+    }
+
+    
+    // --------------- Quellcode per Zufall festlegen:
+    this.quellcode = Math.round( Math.random() * (12 - 1) ) + 1;
+    
+    
+      // ---------------- Für die Speicherung der Reihenfolge des Verlaufs:
+      this.count = 0;                  
+    	this.zeilen = new Array();       
+      this.spalten = new Array();    
+              
+      // ---------------- Array für Zustände, also was wird beim aktuellen Schritt in die Matrix eingetragen:
+      this.path = new Array();        
+
+      // ---------------- Referenz auf das HTML-Canvas im JavaScript DOM (Document Object Model), mit der Methode getElementByID und der DOM-Id des Canvas erhalten:
+      this.canvas = document.getElementById("leinwand");   
+      this.context = this.canvas.getContext("2d"); 
+    
+      // --------------- rel. Nullpunkt:
+      // Bemerkung: Die Werte müsse gleich sein
+      this.x_0 = 50;
+      this.y_0 = 50;
+    
+      // --------------- Größe des Rechteckes im Feld definieren:
+      this.rechteckgroesse = 60;
+      this.feldHoehe = this.rechteckgroesse * this.feldZeilen;
+      this.feldBreide = this.rechteckgroesse * this.feldSpalten;   
+    
+      // --------------- Position des Quellcodes:
+      this.xCodeVerschibung = this.feldSpalten * this.rechteckgroesse + 40;
+      this.yCodeVerschibung = -20;
+      this.textPosX = this.x_0 + this.xCodeVerschibung;
+      this.textPosY = this.y_0 + this.yCodeVerschibung;
+      // --------------- Zeilenabstand im Text
+      this.zeilenabstand = 17;
+
+  
+      // ----------------- Alle Schritte durchspielen und speichern:
+      this.algorithmusDurchspielen();
+    
+    
+    
+  }    
+  /*====================================================Funktionen============================================================*/
+
+  
+  
+  /*----------------------------------------------------------------------------------------------------------------------------------------*/
+  
+  
+  /*-----------------------------------------------------------------------------------------------------------------------------------------*/
+  
+  algorithmusDurchspielen()
+  {
+    this.loescheCanvas();
+    switch(this.quellcode)
+    {
+      case 1:  this.Explore1(this.startZ, this.startS);  break;
+      case 2:  this.Explore2(this.startZ, this.startS);  break;
+      case 3:  this.Explore3(this.startZ, this.startS);  break;
+      case 4:  this.Explore4(this.startZ, this.startS);  break;
+      case 5:  this.Explore5(this.startZ, this.startS);  break;
+      case 6:  this.Explore6(this.startZ, this.startS);  break;
+      case 7:  this.Explore7(this.startZ, this.startS);  break;
+      case 8:  this.Explore8(this.startZ, this.startS);  break;
+      case 9:  this.Explore9(this.startZ, this.startS);  break;
+      case 10: this.Explore10(this.startZ, this.startS); break;
+      case 11: this.Explore11(this.startZ, this.startS); break;
+      case 12: this.Explore12(this.startZ, this.startS); break;
+    }
+    
+  }
+    
+  
+  /*-------------------------------------------- 1. Variante -------------------------------------------------------------------------------*/ 
+  
+  
+  
+	Explore1(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore1((z - 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore1(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore1(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+
+      this.Explore1((z + 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);   
+  }
+  
+   /*--------------------------------------------- 2. Variante ------------------------------------------------------------------------------*/ 
+  
+  
+  
+	Explore2(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore2( z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore2( (z + 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore2(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+
+      this.Explore2((z - 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);      
+  } 
+  
+/*------------------------------------------------ 3. Variante ---------------------------------------------------------------------------*/ 
+  
+  
+  
+	Explore3(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore3( (z + 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore3( z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore3( (z - 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+
+      this.Explore3( z, (s + 1));
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);   
+  } 
+  
+/*------------------------------------------------ 4. Variante ---------------------------------------------------------------------------*/ 
+  
+  
+  
+	Explore4(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore4( z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore4( (z - 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore4(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore4((z + 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*----------------------------------------------- 5. Variante --------------------------------------------------------------------------------*/  
+  
+  Explore5(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore5((z - 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore5( (z + 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore5(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore5( z, (s - 1) );
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*------------------------------------------------- 6. Variante ------------------------------------------------------------------------------*/ 
+  
+  Explore6(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore6( z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore6(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore6( (z + 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore6((z - 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*------------------------------------------------ 7. Variante -------------------------------------------------------------------------------*/ 
+  
+  Explore7(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore7((z + 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore7( (z - 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore7(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore7( z, (s + 1) );
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*------------------------------------------------- 8. Variante ------------------------------------------------------------------------------*/ 
+  
+  Explore8(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore8( z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore8(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore8( (z - 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore8((z + 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*--------------------------------------------------- 9. Variante ----------------------------------------------------------------------------*/ 
+  
+  Explore9(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore9((z - 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore9( (z + 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore9(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore9( z, (s + 1) );
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*----------------------------------------------------- 10. Variante --------------------------------------------------------------------------*/ 
+  
+  Explore10(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore10( z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore10(z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore10( (z - 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore10((z + 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*------------------------------------------------------ 11. Variante -------------------------------------------------------------------------*/ 
+  
+  Explore11(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore11((z + 1), s);
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore11( (z - 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore11(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore11( z, (s - 1) );
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*------------------------------------------------------- 12. Variante ------------------------------------------------------------------------*/ 
+  
+  Explore12(z, s)
+  {    
+     	if ( (z < 0) || ( z > (this.feldZeilen - 1) ) || (s < 0) || ( s > (this.feldSpalten - 1) ) || (this.field[z][s] != LEER) )       
+      {
+        this.matrixEintragLoeschen();   //
+        return;
+      }
+    
+      this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);                                                 
+      
+	    this.Explore12( z, (s - 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+    	this.Explore12(z, (s + 1) );
+    	this.matrixEintrag(z, s, 2);      //
+	    this.MoveRobiTo(z, s);
+      
+	    this.Explore12( (z + 1), s );
+    	this.matrixEintrag(z, s, 2);      //
+      this.MoveRobiTo(z, s);
+      
+      this.Explore12((z - 1), s);
+    	this.matrixEintrag(z, s, 5);       //
+      this.MoveRobiTo(z, s);
+  }
+
+/*-------------------------------------------------------------------------------------------------------------------------------*/ 
+  
+	MoveRobiTo(z, s)
+  {
+    this.field[z][s] = 1;         
+    this.Ausgabe(); // Konsole
+  }
+  
+/*-------------------------------------------------------------------------------------------------------------------------------*/
+  
+  matrixEintrag(z, s, marker)
+  {     
+     // if(this.count < 1)
+      {
+        this.path[this.count] = marker;                // Pfad-Element Situationsabhängig speichern 
+        this.zeilen[this.count] = z;                   // aktuelle Zeilenposition beim Programmschritt
+        this.spalten[this.count] = s;                  // aktuelle Spaltenposition beim Programmschritt        
+        this.count = this.count + 1;                   // Programmschritt
+
+      }
+
+   //   if( ((this.zeilen[this.count] != this.zeilen[this.count-1])  ||  (this.spalten[this.count] != this.spalten[this.count-1]))  &&  (this.count >= 1) )
+   //   {
+   //     this.path[this.count] = marker;                // Pfad-Element Situationsabhängig speichern 
+   //     this.zeilen[this.count] = z;                   // aktuelle Zeilenposition beim Programmschritt
+   //     this.spalten[this.count] = s;                  // aktuelle Spaltenposition beim Programmschritt        
+   //     this.count = this.count + 1;                   // Programmschritt
+   //   }   
+  }
+  
+/*-------------------------------------------------------------------------------------------------------------------------------*/   
+  
+  matrixEintragLoeschen()
+  {
+      this.count = this.count - 1;
+  }
+  
+/*-------------------------------------------------------------------------------------------------------------------------------*/  
+  
+  Ausgabe()
+  {
+    //console.log(this.field.join('\n'));
+    //console.log(this.field);
+  //console.log(this.path);
+  /*  
+    console.log(this.pathHin[3]);
+    console.log(this.pathZurueck[3]);
+    console.log(this.zeilen[3]);
+    console.log(this.spalten[3]);  
+  */
+    
+  }
+    
+/*-------------------------------------------------------------------------------------------------------------------------------*/  
+  
+  
+  
+  ZeichneGitter()
+  {
+    // ------------ Gitter zeichnen:
+    this.context.lineWidth = 2; 
+    this.context.strokeStyle = 'black';
+    this.context.lineJoin = 'round';     // runde Ecken
+    
+	  for (let i = 0; i<this.feldSpalten; i++)
+    {
+		  for (let j = 0; j<this.feldZeilen; j++)
+      {
+			  this.context.strokeRect(this.x_0+(i*this.rechteckgroesse), this.y_0+(j*this.rechteckgroesse), this.rechteckgroesse, this.rechteckgroesse);
+        
+  		};
+	  }
+    
+     // ------------ Rahmen zeichnen:
+     this.context.lineWidth = 5; 
+     this.context.strokeStyle = 'black';
+     this.context.strokeRect(this.x_0-5, this.x_0-5, this.rechteckgroesse*this.feldSpalten+10, this.rechteckgroesse*this.feldZeilen+10);
+    
+    
+     for (let i = 0; i<this.feldSpalten; i++)           // Spalten beschriften
+     {
+			this.context.fillStyle = 'black';
+      this.context.font = 'Bold 14pt Calibri';
+      this.context.textAlign = 'left';
+      this.context.fillText('['+ i +']', this.x_0 + this.rechteckgroesse * (1/3) + this.rechteckgroesse * i, this.y_0 - 20); 
+  	 };
+    
+     for (let i = 0; i<this.feldZeilen; i++)           // Zeilen beschriften
+     {
+			this.context.fillStyle = 'black';
+      this.context.font = 'Bold 14pt Calibri';
+      this.context.textAlign = 'left';
+      this.context.fillText('['+ i +']', this.x_0 - 40 , this.y_0 + this.rechteckgroesse * (3/5) + this.rechteckgroesse * i);
+  	 };
+  }
+  
+/*------------------------------------------------------------------------------------------------------------------------------------*/  
+  
+  
+  zeichneWand(x,y)
+  {  
+    this.context.fillStyle = 'gray';
+    this.context.lineJoin = 'round';    
+    this.context.fillRect(this.x_0 + x, this.y_0 + y, this.rechteckgroesse, this.rechteckgroesse);
+    
+    this.context.lineWidth = 4; 
+    this.context.strokeStyle = 'black';
+    this.context.strokeRect(this.x_0 + x, this.y_0 + y, this.rechteckgroesse, this.rechteckgroesse);
+    //this.context.strokeRect(this.x_0 + x + this.rechteckgroesse/4, this.y_0 + y + this.rechteckgroesse/4, this.rechteckgroesse/2, this.rechteckgroesse/2);
+  }
+
+/*------------------------------------------------------------------------------------------------------------------------------------*/   
+  
+  zeichneHinweg(x, y, schritt)
+  {
+      if(this.zeilen[schritt] < this.zeilen[schritt+1])  // Pfad von oben nach unten - vertikal              //
+      {
+        this.NR_3(x, y + this.rechteckgroesse);
+        this.NR_4(x, y  );
+      }
+  
+      if(this.zeilen[schritt] > this.zeilen[schritt+1])  // Pfad von unten nach oben - vertikal              //
+      {
+        this.NR_3(x, y );
+        this.NR_4(x, y - this.rechteckgroesse );
+      }
+  
+      if(this.spalten[schritt] > this.spalten[schritt+1])  // Pfad von rechts nach links - horizontal        //
+      {
+        this.NR_5(x, y );
+        this.NR_6(x - this.rechteckgroesse, y );
+      }
+    
+      if(this.spalten[schritt] < this.spalten[schritt+1])  // Pfad von links nach rechts - horizontal        // 
+      {
+        this.NR_5(x + this.rechteckgroesse, y );
+        this.NR_6(x, y );
+      }
+  }
+  
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+  
+  zeichneRueckweg(x, y, schritt)
+  {
+    if(this.spalten[schritt] > this.spalten[schritt+1])  // Pfad von links nach rechts - horizontal          //
+    {
+      this.NR_9(x , y);
+      this.NR_8(x - this.rechteckgroesse, y);
+    }
+    if(this.spalten[schritt] < this.spalten[schritt+1])  // Pfad von recht nach links - horizontal          // 
+    {
+      this.NR_9(x + this.rechteckgroesse , y);
+      this.NR_8(x , y);
+    }
+ 
+     
+    if(this.zeilen[schritt] > this.zeilen[schritt+1])  // Pfad von unten nach oben - vertikal               //
+    {
+       this.NR_11(x, y );
+       this.NR_10(x, y - this.rechteckgroesse);
+    }
+    
+    if(this.zeilen[schritt] < this.zeilen[schritt+1])  // Pfad von oben nach unten - vertikal               // 
+    {
+       this.NR_11(x, y + this.rechteckgroesse );
+       this.NR_10(x, y  );
+    }
+  }
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+  
+
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/  
+  
+  zeichneSmiley(x, y)
+  { 
+    // Anpassungsfaktor:
+      var faktor = (this.rechteckgroesse/80);
+    // ------------------ Gesicht zeichnen:
+    	var radius1 = 28 * faktor;
+    	this.context.beginPath();
+    	this.context.arc((x + this.x_0 + this.rechteckgroesse/2), (y + this.y_0 + this.rechteckgroesse/2), radius1, 0, this.gradInRadient(360), true);
+    	this.context.fillStyle = "yellow";
+    	this.context.fill();
+      this.context.lineWidth = 1;
+      this.context.fillStyle = "black";
+      this.context.arc((x + this.x_0 + this.rechteckgroesse/2), (y + this.y_0 + this.rechteckgroesse/2), radius1, 0, this.gradInRadient(360), true);
+      this.context.stroke();
+    
+    // ------------------- Mund zeichnen:
+     	var radius2 = 30 * faktor;
+      this.context.beginPath();
+      this.context.arc((x + this.x_0 + this.rechteckgroesse/2), (y + this.y_0 + 5 + this.rechteckgroesse/2), Math.floor(radius2/2), 0, this.gradInRadient(180), false);
+      this.context.fillStyle = "red";
+      this.context.fill();
+      this.context.lineWidth = 1;
+      this.context.fillStyle = "black";
+      this.context.arc((x + this.x_0 + this.rechteckgroesse/2), (y + this.y_0 + 5 + this.rechteckgroesse/2), Math.floor(radius2/2), 0, this.gradInRadient(180), false);
+      this.context.stroke();
+    
+    // -------------------- Augen zeichnen:
+      var radius3 = 5 * faktor;
+      this.context.beginPath();
+      this.context.arc((x + this.x_0 - 10*faktor + this.rechteckgroesse/2), (y + this.y_0 - 10 + this.rechteckgroesse/2), radius3, 0, 2*Math.PI, true);
+      this.context.fillStyle = "black";
+      this.context.fill();
+    
+      this.context.beginPath();
+      this.context.arc((x + 10*faktor + this.x_0 + this.rechteckgroesse/2 ), (y + this.y_0 - 10 + this.rechteckgroesse/2), radius3, 0, 2*Math.PI, true); 
+      this.context.fillStyle = "black";
+      this.context.fill();
+    
+    // --------------------- Pupillen zeichnen
+      var radius4 = 2 * faktor;
+      this.context.beginPath();
+      this.context.arc((x + this.x_0 - 12*faktor + this.rechteckgroesse/2), (y + this.y_0 - 10 + this.rechteckgroesse/2), radius4, 0, 2*Math.PI, true);
+      this.context.fillStyle = "white";
+      this.context.fill();
+    
+      this.context.beginPath();
+      this.context.arc((x + 8*faktor + this.x_0 + this.rechteckgroesse/2 ), (y + this.y_0 - 10 + this.rechteckgroesse/2), radius4, 0, 2*Math.PI, true);
+      this.context.fillStyle = "white";
+      this.context.fill();
+    
+    // --------------------- Nase zeichnen:
+      this.context.fillStyle = "black";
+      this.context.beginPath();
+      this.context.fillRect(x + this.x_0 + 38*faktor, this.y_0 + y + 31*faktor, 3*faktor, 10*faktor); 
+    
+    // --------------------- Zähne zeichnen:
+      this.context.fillStyle = "white";
+      this.context.beginPath();
+      this.context.fillRect(x + this.x_0 + 42*faktor, this.y_0 + y + 47*faktor, 5*faktor, 5*faktor); 
+      this.context.fillRect(x + this.x_0 + 32*faktor, this.y_0 + y + 47*faktor, 5*faktor, 5*faktor); 
+  }
+  
+  gradInRadient(grad)
+  {
+	    return (grad*Math.PI)/180;
+  }
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+  
+  
+  zeichneFeld(schritt)   // Funktion zeichnet aktuelle spielsituation. Parameter ist zu zeichnender Schritt
+  {
+       /* ---------- 1.Schritt: Gitter zeichnen ----------- */
+       this.ZeichneGitter();
+    
+       /* 2. Wand zeichnen */
+        for(let i = 0; i<this.feldSpalten; i++)
+        {
+            for(let j = 0; j<this.feldZeilen; j++)
+            {
+              if(this.field[j][i] == 9)
+              {
+                  this.zeichneWand(i*this.rechteckgroesse, j*this.rechteckgroesse);
+              }  
+            }
+        }
+         
+      /* ------------- 2.Schritt: Hinweg zeichnen ----------- */
+      for(let s = 0; s<schritt; s++)
+      {
+                  if( this.path[s]  == 2)
+                    {
+                        this.zeichneHinweg(this.spalten[s] * this.rechteckgroesse, this.zeilen[s] * this.rechteckgroesse, s);//
+                    }                  
+       }
+    
+      /* ------------ 3.Schritt: Rückweg zeichnen ----------*/
+      for(let s = 0; s<schritt; s++)
+      {
+                  if(this.path[s] == 5)
+                    {
+                        this.zeichneRueckweg(this.spalten[s] * this.rechteckgroesse, this.zeilen[s] * this.rechteckgroesse, s);
+                    }                  
+       }
+    
+      /* ------------- 4.Schritt: Kopf zeichnen ----------- */
+      this.zeichneSmiley(this.spalten[schritt] * this.rechteckgroesse, this.zeilen[schritt] * this.rechteckgroesse);
+      
+    
+      /* ------------- 5. Schritt: Quellcode zeichnen ----- */
+      this.ZeichneQuellcode(this.quellcode);
+  }
+  
+
+/*---------------------------------------Funktionen zum Zeichnen von Schritten - Feldsituationen-----------------------------------------*/  
+  
+/*------------------------------------------------------ Startpunkt zeichnen - Kreis ----------------------------------------------------*/  
+
+  /*yellow*/
+  
+  NR_2(x,y) 
+  {
+      this.context.beginPath();
+      this.context.lineWidth = 1; 
+      this.context.strokeStyle = 'black';
+      this.context.fillStyle = 'green';
+      this.context.arc(this.x_0 + x, this.y_0 + y, 18, 0, Math.PI * 2, true); 
+      this.context.fill();
+      this.context.stroke();
+      // Text zeichnen:
+      this.context.fillStyle = 'green';
+      this.context.font = 'Bold 12pt Calibri';
+      this.context.textAlign = 'left';
+      this.context.fillText('START', this.x_0 + x - 20, this.y_0 + y+35);
+  }
+  
+/*-----------------------------------------------------------------------------------------------------------------------------------*/
+/*    green
+
+     **  **   
+     **  **
+     **  **
+     ******     
+*/ 
+  
+ NR_3(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'green'; 
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse/4, this.y_0 + y, this.rechteckgroesse/2, this.rechteckgroesse*(3/4));
+ }
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*    green
+
+     ******   
+     **  **
+     **  **
+     **  **     
+*/ 
+  
+ NR_4(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'green';   
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse/4, this.y_0 + y + this.rechteckgroesse*(1/4), this.rechteckgroesse/2, this.rechteckgroesse*(3/4));  
+ }
+  
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*    green
+
+     ******   
+         **
+         **
+     ******     
+*/ 
+  
+NR_5(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'green'; 
+    this.context.fillRect(x + this.x_0, this.y_0 + y + this.rechteckgroesse/4, this.rechteckgroesse*(3/4), this.rechteckgroesse/2);  
+ }
+  
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/  
+/*    green
+
+     ******   
+     **
+     **
+     ******     
+*/ 
+  
+NR_6(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'green'; 
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse*(1/4), this.y_0 + y + this.rechteckgroesse/4, this.rechteckgroesse*(3/4), this.rechteckgroesse/2);  
+ }
+  
+  
+/*------------------------------------------------------ Endpunkt zeichnen - Kreis ---------------------------------------------------------*/  
+  
+  /* red*/
+  
+  NR_7(x,y) 
+  {
+      this.context.beginPath();
+      this.context.lineWidth = 1; 
+      this.context.strokeStyle = 'black';
+      this.context.fillStyle = 'red';
+      this.context.arc(this.x_0 + x, this.y_0 + y, 8, 0, Math.PI * 2, true); 
+      this.context.fill();
+      this.context.stroke();
+      // Text zeichnen:
+      this.context.fillStyle = 'red';
+      this.context.font = 'Bold 12pt Calibri';
+      this.context.textAlign = 'left';
+      this.context.fillText('ENDE', this.x_0 + x - 20, this.y_0 + y+35);
+  }
+  
+  
+/*-------------------------------------------------------------------------------------------------------------------------------------*/   
+  
+/*    red
+
+     ******   
+     **
+     **
+     ******     
+*/ 
+  
+NR_8(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'red'; 
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse*(3/8), this.y_0 + y + this.rechteckgroesse*(3/8), this.rechteckgroesse*(5/8), this.rechteckgroesse/4);  
+ }   
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/  
+  
+  /*  red
+
+     ******   
+         **
+         **
+     ******     
+*/ 
+  
+  
+NR_9(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'red'; 
+    this.context.fillRect(x + this.x_0, this.y_0 + y + this.rechteckgroesse*(3/8), this.rechteckgroesse*(5/8), this.rechteckgroesse/4);  
+ }
+  
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*    red
+
+     ******   
+     **  **
+     **  **
+     **  **     
+*/ 
+  
+ NR_10(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'red';   
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse*(3/8), this.y_0 + y + this.rechteckgroesse*(3/8), this.rechteckgroesse/4, this.rechteckgroesse*(5/8));  
+ }
+  
+ /*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+  
+/*   red
+
+     **  **   
+     **  **
+     **  **
+     ******     
+*/ 
+  
+ NR_11(x,y) 
+ {
+    this.context.lineWidth = 2; 
+    this.context.fillStyle = 'red'; 
+    this.context.fillRect(x + this.x_0 + this.rechteckgroesse*(3/8), this.y_0 + y, this.rechteckgroesse/4, this.rechteckgroesse*(5/8));
+ }
+  
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+
+
+  
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+/*-------------------------------------------------------------------------------------------------------------------------------------*/ 
+  ZeichneQuellcode(Nr)              // 1. Quellcodeauswahl                                                                      
+    {   
+        // Rahmen Startpunktdifferenz:
+        let d = 30;
+       // let zeilenabstand = 17; 
+     //   this.context.font = '20px TNR';                                                     // Schrifteigenschaften
+        this.context.fillStyle = "black";                                                          // Schriftfarbe
+      
+        //this.context.fillText( "Gegeben ist das folgende C++ Programm:", this.textPosX, this.textPosY);
+        this.context.fillText( "Der kleine Roboter Robi-Tobi wird mit Hilfe der unten dargestellten rekursiven",          this.textPosX, this.textPosY);
+        this.context.fillText( "Funktion Explore(…) durch eine gerasterte Landschaft bewegt. Die Landschafts-",           this.textPosX, this.textPosY + this.zeilenabstand);
+        this.context.fillText( "informationen werden dabei aus einer Matrix lab mit x Zeilen und y Spalten ausgelesen. ", this.textPosX, this.textPosY + this.zeilenabstand*2);
+        this.context.fillText( "Es wird unterschieden, ob ein Landschaftsfeld leer (LEER) oder nicht leer ist.",          this.textPosX, this.textPosY + this.zeilenabstand*3);
+        this.context.fillText( "Die Unterfunktion MoveRobiTo(z, s) bewegt Robi-Tobi auf das Landschaftsfeld mit ",        this.textPosX, this.textPosY + this.zeilenabstand*4);
+        this.context.fillText( "Zeilenindex z (0 ≤ z < x) und Spaltenindex s (0 ≤ s < y). Falls er sich schon ",          this.textPosX, this.textPosY + this.zeilenabstand*5);
+        this.context.fillText( "auf dem Feld befindet, dann bleibt er dort einfach stehen.",                              this.textPosX, this.textPosY + this.zeilenabstand*6);
+        this.context.fillText( "Jedes von Robi-Tobi einmal befahrene Feld wird dauerhaft markiert und gilt damit",        this.textPosX, this.textPosY + this.zeilenabstand*7);
+        this.context.fillText( "nicht mehr als leer. Robi-Tobi beginnt seine Fahrt durch Aufruf von Explore(..). ",       this.textPosX, this.textPosY + this.zeilenabstand*8);
+        this.context.fillText( "Ihre Aufgabe ist es nun, in der links dargestellten Landschaft den Weg zu zeigen, ",      this.textPosX, this.textPosY + this.zeilenabstand*9);
+        this.context.fillText( "den Robi-Tobi bei seiner Fahrt zurücklegt. Mit Hindernissen belegte Felder sind grau,",   this.textPosX, this.textPosY + this.zeilenabstand*10);
+        this.context.fillText( "alle anderen Felder sind zu Beginn leer.",                                                this.textPosX, this.textPosY + this.zeilenabstand*11);
+
+
+        // Textrahmen zeichnen
+        this.context.beginPath();  
+        this.context.lineWidth = 2; 
+        this.context.strokeStyle ="black";
+        this.context.strokeRect(this.textPosX, this.textPosY + this.zeilenabstand*12, 650, 280);
+        this.context.stroke(); 
+        // Textrahmen füllen
+        this.context.beginPath();                                                  
+        this.context.fillStyle = "#F3DDBC"; 
+        this.context.fillRect(this.textPosX, this.textPosY + this.zeilenabstand*12, 650, 280);
+        this.context.fill();  
+      
+        switch(Nr)  // Quellcodeauswahl (wird zufällig benutzt)
+        {
+            case 1:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;
+            
+            case 2:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break; 
+            
+            case 3:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break; 
+
+            case 4:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break; 
+            
+            case 5:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;             
+            
+            case 6:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;             
+ 
+            case 7:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;                
+            
+            
+            case 8:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;             
+            
+            
+            case 9:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;              
+
+            case 10:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;             
+            
+            
+            case 11:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;  
+            
+            case 12:
+                  {
+                    this.context.font = 'bold 16px Courier';        
+                    this.context.fillStyle = "black";                                                          
+                    this.context.fillText( 'void Explore(int z, int s)',                                        this.textPosX + 20, this.textPosY + this.zeilenabstand*14);
+                    this.context.fillText( '{',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*15);
+                    this.context.fillText( '   if ( z<0 || z>(x-1) || s<0 || s>(y-1) || lab[z][s] != LEER )',   this.textPosX + 20, this.textPosY + this.zeilenabstand*16);
+                    this.context.fillText( '      return;',                                                     this.textPosX + 20, this.textPosY + this.zeilenabstand*17);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*18);
+                    this.context.fillText( '   Explore(z, s-1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*19);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*20);
+                    this.context.fillText( '   Explore(z, s+1);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*21);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*22);
+                    this.context.fillText( '   Explore(z+1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*23);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*24);
+                    this.context.fillText( '   Explore(z-1, s);',                                               this.textPosX + 20, this.textPosY + this.zeilenabstand*25);
+                    this.context.fillText( '   MoveRobiTo(z, s);',                                              this.textPosX + 20, this.textPosY + this.zeilenabstand*26);
+                    this.context.fillText( '}',                                                                 this.textPosX + 20, this.textPosY + this.zeilenabstand*27);
+                  } 
+            break;
+        }
+      
+          
+    }
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/  
+  loescheCanvas() 
+  {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/   
+  TextausgabeFenster(text, n) // 1.Parameter ist eine Zeichenkette, 2. Parameter ist Nummer der Zeile (zulässig sind 1 oder 2)
+  {
+     for(let i = 0; i<n; i++)
+     {
+      if(n==1) 
+      {
+      let x = this.textPosX ;
+      let y = this.textPosY + this.zeilenabstand * 29; 
+      // Rahmen zeichnen:
+	    this.context.beginPath();
+	    this.context.strokeStyle = "black";
+	    this.context.lineWidth = "2";
+	    this.context.fillStyle = "rgb(255,255,0)";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + 650, y);
+	    this.context.lineTo(x + 650, y+50);
+	    this.context.lineTo(x, y+50);
+      this.context.lineTo(x, y);
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+	
+	    this.context.textAlign = 'left';
+	    this.context.fillStyle = '#000';
+      this.context.font = '20px TNR';  
+	    this.context.fillText(text, x+10, y+30);
+      }  
+       
+      if(n==2) 
+      {
+      let x = this.textPosX ;
+      let y = this.textPosY + this.zeilenabstand * 32 ; 
+      // Rahmen zeichnen:
+	    this.context.beginPath();
+	    this.context.strokeStyle = "black";
+	    this.context.lineWidth = "2";
+	    this.context.fillStyle = "rgb(255,255,0)";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + 650, y);
+	    this.context.lineTo(x + 650, y+50);
+	    this.context.lineTo(x, y+50);
+      this.context.lineTo(x, y);
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+	
+	    this.context.textAlign = 'left';
+	    this.context.fillStyle = '#000';
+      this.context.font = '20px TNR';  
+	    this.context.fillText(text, x+10, y + 30);
+      }  
+       
+     }  
+  } 
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/   
+  
+  istRichtig(x, y, step )  // Parameter: 1 und 2 Mauskoordinaten, 3 aktueller Schritt
+  {
+    var ret = false;
+    
+    if(  ( this.KoordToRowsColumns(x) == this.spalten[step] )  && ( this.KoordToRowsColumns(y) == this.zeilen[step] )  ) 
+    {
+      ret = true;
+    }
+    return ret;
+  }
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/  
+  KoordToRowsColumns(a)  // Die Funktion konvertiert Koordinaten in die Zeilennummern oder Spaltennummern, abhängig davon wo die Koordinaten gerade liegen
+  {
+    var ret = Math.round((a - this.x_0)/this.rechteckgroesse) - 1;
+    return ret;
+  }
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+  
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/  
+  
+}
+
+    </script>
+
+    <script>
+    // ==================================================================================== main ============================================================================
+        /*===============================================================  Variablen  ====================================================================*/
+
+// per default beim Laden der Seite Zeilen = 4, Spalten = 4.
+let zeilen = 4;
+let spalten = 4;
+
+var Spiel = new RobiTobiT(zeilen, spalten);                                                       // Parameter: 1. Anzahl Zeilen, 2. Anzahl Spalten
+
+const ZUSTAND_0 = 0;   // Beim aufruf der Seite
+const ZUSTAND_1 = 1;   // Warten auf Eingabe
+const ZUSTAND_2 = 2;   // Ende des Spiels
+
+var zustand = 0;
+var step = 0;         // Aktueller Stand
+
+var x_Koordinate;     // x-Koordinate des Mauszeigers zum Auslesen
+var y_Koordinate;     // y-Koordinate des Mauszeigers zum Auslesen
+
+var errors = 0;       // Variable zum Zählen von Fehlversuchen
+
+var ClickEvent = 0;   // Beim anklicken des Feldes wird der ClickEvebt=1 gesetzt, danach soll die Variable wieder auf null gesetzt werden.
+
+Main();               // Aufruf des Programms
+
+/*================================================================  Funktionen  ====================================================================*/
+
+let nZeilen = document.getElementById("anzahlZeilen");
+nZeilen.addEventListener("input", function() { zeilen = nZeilen.value; }, false);
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+let nSpalten = document.getElementById("anzahlSpalten");
+nSpalten.addEventListener("input", function() { spalten = nSpalten.value; }, false);
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+function MausOnClickHandler(event) 
+{
+  let x_temp = event.pageX;
+  let y_temp = event.pageY;  
+  x_Koordinate = x_temp - Spiel.x_0;   // x-Koordinate des Mauszeigers auslesen
+  y_Koordinate = y_temp - Spiel.y_0;   // y-Koordinate des Mauszeigers auslesen
+  ClickEvent = 1;
+  //Spiel.TextausgabeFenster("x-Koordinate: " + x_Koordinate + ", y-Koordinate: " + y_Koordinate, 1)
+  Main();
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+function init()  // Handler initialisieren
+{
+   Spiel.canvas.onclick = MausOnClickHandler;   // Handler definieren beim Klick
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+function FeldGenerieren()
+{
+  Spiel = new RobiTobiT(zeilen, spalten);
+  step = 0;
+  errors = 0;
+  Main();
+  emptyNumField();
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+function Neustarten()   //Aktuelles Spiel soll von Vorne gehen
+{
+  errors = 0;
+  step = 0;
+  zustand = 0;
+  Spiel.loescheCanvas(); 
+  Spiel.zeichneFeld(step); 
+  Main();
+}
+
+/* ====================================================  "Hauptprogramm"  =========================================================================== */
+
+function Main()
+{ 
+  var offsetX = 50;
+  var offsetY = 0;
+   //   switch(zustand)
+   //   {
+            // Warten auf Event
+         //   case 0: 
+         //         {
+                    Spiel.zeichneFeld(step); 
+                    
+                    if(ClickEvent == 1 && Spiel.istRichtig(x_Koordinate + offsetX, y_Koordinate + offsetY , step + 1 ) == true) //  Nullpunkt des Feldes bem ClickEvent links oben soll kompesiert werden x = 10 y = 70
+                      {
+                        ClickEvent = 0;
+                        Richtig();
+                        if(hatGewonnen() == true)
+                        {
+                           Gewonnen(); 
+                        } 
+                      
+                      }
+                     if(ClickEvent == 1 && Spiel.istRichtig(x_Koordinate + offsetX, y_Koordinate + offsetY, step + 1 ) == false)
+                      {
+                         ClickEvent = 0;
+                         Falsch();
+                      }
+
+       //           } break;
+     // }
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+function Falsch() // Ausgaberoutine, wenn der Schritt falsch ist
+{
+   errors++;
+   Spiel.loescheCanvas(); 
+   Spiel.TextausgabeFenster("Es war leider Falsch!", 1);
+   Spiel.TextausgabeFenster("Sie haben " + errors + " Fehlversuch(e) gemacht!", 2);
+   Main();
+ // Spiel.TextausgabeFenster("x-Koordinate: " + x_Koordinate + ", y-Koordinate: " + y_Koordinate, 1)
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+function Richtig() // Ausgaberoutine, wenn der Schritt richtig ist
+{
+   step++;
+   Spiel.loescheCanvas(); 
+   Spiel.TextausgabeFenster("Richtig!", 1);
+   Main();
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+function hatGewonnen() // Funktion überprüft, ob man gewonnen hat
+{
+  var ret = false;
+  
+  if(step+1 == Spiel.count)
+  {
+    ret = true;
+  }
+  // ToDo ...
+  return ret;
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------ */
+
+
+function Gewonnen()  // Ausgaberoutine, wenn man gewonnen hat.
+{
+   Spiel.loescheCanvas(); 
+   Spiel.zeichneFeld(step);
+   Spiel.TextausgabeFenster("Glückwunsch! Sie haben diese Aufgabe gelöst.", 1);
+   Spiel.TextausgabeFenster("Sie haben " + errors + " Fehlversuch(e) gemacht!", 2);
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+function emptyNumField() // Nummerfelder leeren
+{ 
+  document.getElementById("anzahlZeilen").value=""; 
+  document.getElementById("anzahlSpalten").value=""; 
+}
+
+/* ------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+window.onload = init;         // Handler initialisieren
+
+/* -------------------------------------------------------------------------------------------------------------------------------------------------------- */
+    </script>
+
+
+
+
+    
+   <p style="text-align: right;"> <small> Hochschule Hamm-Lippstadt, Studiengang Mechatronik, 2022 </small> </p>
+  </body>
+  
+</html>
