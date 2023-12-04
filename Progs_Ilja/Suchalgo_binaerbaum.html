@@ -1,0 +1,1099 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="de">
+  
+  <head>
+    <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     
+
+       <script language="javascript" type="text/javascript">
+      
+       </script>
+
+
+    <style>
+            body {
+            font-family: helvetica, arial, sans-serif;
+            margin: 2em;
+            }
+
+            h1 {
+            font-style: italic;
+            color: rgb(255, 0, 0);
+            }
+
+
+            .toggle-buttons input[type="radio"] {
+                visibility: hidden;
+            }
+
+            .toggle-buttons label {
+                border: 1px solid #333;
+                border-radius: 0.5em;
+                padding: 0.5em;
+            }
+
+            .toggle-buttons input:checked + label {
+                background: #ebf5d7;
+                color: #5a9900;
+                box-shadow: none;
+            }
+
+            input:hover + label,
+            input:focus + label {
+                background: #ffebe6;
+            }
+
+            .together {
+                position: relative;
+            }
+
+            .together input {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                top: 0;
+                left: 0;
+            }
+
+            .together label {
+                margin: 0.5em 0;
+                border-radius: 0;
+            }
+
+            .together label:first-of-type {
+                border-radius: 0.5em 0 0 0.5em;
+            }
+
+            .together label:last-of-type {
+                border-radius: 0 0.5em 0.5em 0;
+            }
+
+            button {
+                height: 50px;
+                width: 200px;
+            }
+
+
+    </style>
+
+    <title>Suchbaum</title>
+    
+
+  </head>  
+  
+  
+
+    
+
+
+   <body>    
+
+
+   
+     <h2>Durchlaufen der Knoten eines Binärbaumes in: </h2>
+
+
+
+
+     
+      <div class="toggle-buttons">
+        
+	      <input type="radio" id="b1" name="group-b"    onclick="RadioButtonPrefixChecked();"/>
+        <label for="b1"><b>Praefix Ordnung</b></label>
+        
+      	<input type="radio" id="b3" name="group-b"    onclick="RadioButtonInfixChecked()"/>
+        <label for="b3"><b>Infix Ordnung</b></label>
+        
+      	<input type="radio" id="b2" name="group-b"    onclick="RadioButtonPostfixChecked();" />
+        <label for="b2"><b>Postfix Ordnung</b></label>
+        
+      </div>
+     <!--Auswahl per default -->
+     <script>  
+       radiobtn = document.getElementById("b1");
+       radiobtn.checked = true;
+     </script>
+    
+    
+    
+   <canvas id="leinwand" height="800" width="1800"></canvas>
+
+    <p> 
+      
+
+      
+      <button onclick="StartButton()"> START   </button>  
+      <button onclick="BaumGenerierenButton()"> Binaerbaum neu generieren   </button> 
+    </p> 
+
+
+
+
+
+    <!-- -->
+<script>
+    //======================================================================== BinTree ============================================================================================
+                
+                
+
+            //===========================Order=(ähnlich wie Enum aus C/C++)====================================
+
+            const Order = {
+            preorder: 'preorder',
+            inorder: 'inorder',
+            postorder: 'postorder'
+            };
+
+            //============================Knoten: BinaryNode=====================================
+
+            class BinaryNode 
+            {
+                constructor(val,pos) 
+                    {       // Konstruktor-Dadurch werden neue Objektinstanzen erzeugt
+                
+                    this.val = val;        // "Zeiger" auf Wert des Knotens
+                    this.left = null;      // "Zeiger" auf den linken Knoten
+                    this.right = null;     // "Zeiger" auf den rechten Knoten
+                
+                    this.pos = pos;          /* Position des Knotens im Baum von 0 bis n Knoten*/    //ToDo: Auch für das Löschen von Knoten die Methoden anpassen
+                    }
+
+            isLeaf() {// Hat keine Kinderknoten?
+                
+                if (this.left == null && this.right == null) return true; // Wenn beide Kinderknoten leer sind => true
+                return false; // Ansonsten false
+            }
+
+            hasOnlyLeftChild() {// Hat nur den Linken Kinderknoten?
+                
+                if (this.left !== null && this.right == null) return true;
+                return false;
+            }
+
+            hasOnlyRightChild() {// Hat nur den rechten Kinderknoten?
+                
+                if (this.right !== null && this.left == null) return true;
+                return false;
+            }
+
+            hasChildren() {// Hat den linken und rechten Kinderknoten?
+                
+                if (this.left !== null && this.right !== null) return true;
+                return false;
+            }
+            }
+
+
+
+            //============================Baum: BinaryTreeR=====================================
+
+            class BinaryTreeR 
+            {
+                    constructor() 
+                    {
+                        this.root = null;                                        // Wurzelknoten, spitze des Baumes.
+                        this.counterPos = 0;                                     // Zähler entspricht der Reihenfolge (0 1 2 3 ...) der Ausgabe entsprechend der Ordnung 
+                        this.positionen = new Array();                           // Array mit Positionen der Knoten im Baum in der Reihenfolge der Ausgabe. Jeder Position sind eindeutige Koordinaten zugeordnet.
+                        this.zeichen = new Array();                              // Array mit Knotenwerten entsprechend der Position der Knoten. Z.B. Knoten [0] hat den Wert 5 ...
+                                                                                // Z.B. ein Element mit Index(counterPos) 0 mit Position x wird als erstes Ausgegeben an der Position x.
+                        this.baumbelegung = new Array();                         // Baum als Array mit den Werten, "999" enspricht "Nicht belegt"
+                        for(let i=0;i<100;i++)                                   
+                        {
+                            this.baumbelegung[i]=999;
+                        }
+
+                        this.markiert=new Array();                               // Ausgegeben Knoten werden markiert, wird benutzt für die Korrekte Kantenausge. Nur Markierte Knoten werden mit den Kantenten miteinander verbunden!
+                        
+                        this.leinwandBreite = 1800;
+                        this.leinwandHoehe = 800;
+
+                        this.canvas = document.getElementById("leinwand");      // Referenz auf das HTML-Canvas im JavaScript DOM (Document Object Model), 
+                                                                            // mit der Methode getElementByID und der DOM-Id des Canvas erhalten.
+                        this.context = this.canvas.getContext("2d");
+                        
+                    
+                //---------------------------------Knoten-Positionen auf dem Canvas berechnen-------------------------------------------------
+                        
+                    
+                        
+                        
+                        //--------------------------- x-Koordinaten berechnen --------------------------------- 
+                    this.knotenpositionenX = new Array();                     // Array für die x-Koordinaten der Knotenposition
+                    this.knotenpositionenY = new Array();                     // array für die y-Koordinaten der Knotenposition
+                        
+                    // erste Möglichkeit (nicht ganz symmetrisch)            
+
+
+                        //----------------------- zweite Möglichkeit (6 Ebenen getrent füllen)----------
+                        
+                        let randabstand = 30;                                                                  // Abstand von dem linken Rand der Leinwand
+                        // 6-te Ebene:                                                                        (32-Knoten)
+                    
+                        let max = 32;                                                                         // Anzahl der Knoten in der 6-ten Ebene 32
+                        let n = this.leinwandBreite/max;                                                      // Schttweite in der 6-ten Ebene
+                                                                                                            // Anzahl der Knoten mit 6 Ebenen  1+2+4+8+16+32=63
+                        let n0=n;
+                        let schritt = 0 + randabstand;
+                        for(let i=31; i<63; i++)                                                              // 32 33 34 ... 63
+                        {
+                            this.knotenpositionenX[i]=schritt;
+                            schritt=schritt+n0;
+                        }
+                        
+                        // 5-te Ebene:                                                                          (16-Knoten)
+                        
+                        let n1 = 2*n0;                        
+                        schritt = n/2 + randabstand;
+                        for(let i = 15; i<31; i++)                                                                // 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 
+                        {
+                            this.knotenpositionenX[i]=schritt;
+                            schritt = schritt+n1;
+                        }
+                        
+                        // 4-te Ebene:                                                                          (8-Knoten)
+                        
+                        let n2 = 2*n1;
+                        schritt = n+(n/2) + randabstand;
+                        for(let i = 7; i<15; i++)                                                                 // 7 8 9 10 11 12 13 14
+                        {
+                            this.knotenpositionenX[i]=schritt;
+                            schritt = schritt+n2;
+                        }
+                        
+                        // 3-te Ebene:                                                                          (4-Knoten)
+                        
+                        let n3 = 2*n2;
+                        schritt = (3*n)+(n/2) + randabstand;
+                        for(let i=3; i<7; i++)                                                                   // 3 4 5 6
+                        {
+                            this.knotenpositionenX[i]=schritt;
+                            schritt=schritt+n3;
+                        }
+                        
+                        // 2-te Ebene:                                                                            (2-Knoten)
+                        
+                        let n4=2*n3;
+                        schritt = (7*n) + (n/2) + randabstand;
+                        for(let i = 1; i<3; i++)                                                                   // 1 2
+                        {
+                            this.knotenpositionenX[i]=schritt;
+                            schritt = schritt+n4;
+                        }
+                        
+                        // 1-te Ebene:                                                                            (1 Knoten)
+                        
+                        this.knotenpositionenX[0] = (15*n) + (n/2) + randabstand;                                 //  0
+                        
+                        //-------------------------- y-Koordinaten berechnen---------------------------------------
+                    this.knotenpositionenY[0]=50;
+                    this.knotenpositionenY[1]=150;
+                    this.knotenpositionenY[2]=150;
+                    this.index=3;
+                    this.n = 2;
+                        
+                    for(let j = 2;j<6;j++)
+                    {
+                        for(let i = 0;i<this.n*2;i++)
+                            { 
+                            this.knotenpositionenY[this.index]=100*(j+1);
+                            this.index++;
+                            }
+                        this.n = this.n*2;  
+                    }
+                
+                
+                    }  // ========================================================================Konstruktor Ende =======================================================
+
+            //--------------------------------------
+            
+            exists(val) 
+            {
+                // Wert im Baum enthalten?
+                var dummy = this.root;
+                var result = this.findNode(dummy, val);
+                return result; // "Referenz" zurückgeben
+            }
+            
+            //----------------------------------------
+            findNode(node, val) { // node:=Startpunkt, val:=gesuchter Wert
+            
+
+                if (!node) return node;// wenn der aktuelle Knoten null ist, wird null zurückgegeben
+                
+                else {
+                if (val < node.val) return this.findNode(node.left, val);// wenn val kleiner als der aktuelle Knoten, suche im Linken Knoten
+                
+                else if (val > node.right) return this.findNode(node.right, val);// wenn val größer als der aktuelle Knoten, suche im rechten Knoten
+                
+                else return node; // ansonsten der Wert gefunden und der aktuelle Knoten wird zurückgegeben
+                }
+            }
+            
+            //----------------------------------------
+            add(val) 
+            {
+                var dummy = this.root;
+                this.insert(dummy, val, 0);                                                                         //am Anfang pos=0
+            }
+            
+            //----------------------------------------
+            insert(node, val, pos) // node:=Knoten, val:=Wert  , pos:=Position
+            {
+
+                if (!node)                                          // Wenn der Baum leer ist, neuer Knoten als Wurzel
+                { 
+                this.root = new BinaryNode(val, pos);
+                this.baumbelegung[pos]=val;                       // Eintrag der Position
+                }else 
+                {
+                if (val <= node.val) // Wenn val kleiner als aktueller Knoten, nach links gehen
+                {
+                    
+
+                    if (!node.left)// Wenn der linke Kindknoten leer ist, ist der Platz gefunden 
+                    {  
+                    if(((2*pos)+1) < 63)                                             // Den Baum nur bis Ebene 6 belegen
+                        {
+                        node.left = new BinaryNode(val, (2*pos)+1 );            /* 2*pos+1 Berechnung des linken Kindknotens */
+                        this.baumbelegung[(2*pos)+1]=val;                       // Eintrag der Position
+                        }
+                    } else 
+                    return this.insert(node.left, val, (2*pos)+1 );         // Ansonsten rekursiv weitersuchen
+                    
+                    
+                } else 
+                {
+                    if (!node.right) // Wenn der rechte Kindknoten leer ist, ist der Platz gefunden
+                    {
+                    if(((2*pos)+2)<63)                                           // Den Baum nur bis Ebene 6 belegen
+                        {
+                        node.right = new BinaryNode(val, (2*pos)+2);             /* 2*pos+2 Berechnung des linken Kindknotens  */
+                        this.baumbelegung[(2*pos)+2]=val;                        // Eintrag der Position
+                        }
+                    } else 
+                    return this.insert(node.right, val, (2*pos)+2);          // Ansonsten rekursiv weitersuchen     
+                }
+                }
+            }
+            
+            //------------------------------------------
+            goLeft(node) 
+            {
+                if (!node.left) return node;
+                else return this.goLeft(node.left);
+            }
+            
+            //------------------------------------------
+            remove(val) 
+            {
+                this.deleteNode(this.root, this.root, val);
+            }
+            
+            //------------------------------------------
+            deleteNode(parent, node, val) 
+            {                  // parent:= Wurzel des Baumes merken, node:=aktueller Knoten (am Anfang parent==node), zu löschender Wert
+            
+                if (node == null) return;
+                //look for specified value on tree
+                if (val < node.val) return this.deleteNode(node, node.left, val);
+                //go right if value is greater than curr node
+                else if (val > node.val) return this.deleteNode(node, node.right, val);
+                //if we found the value, we have three possible scenarios
+                else {
+                //if the node we want to delete is a leaf
+                if (node.isLeaf()) {
+                    if (node == this.root) this.root = null;
+                    else if (val < parent.val) parent.left = null;
+                    else parent.right = null;
+                    //if the node we want to delere has a child to the left
+                } else if (node.hasOnlyLeftChild()) {
+                    if (node == this.root) this.root == node.left;
+                    //we decide which side to add it to based on the value
+                    //left if val < than current node
+                    else if (val < parent.val) parent.left = node.left;
+                    //right if val is greater
+                    else parent.right = node.left;
+
+                    //if the node has only a right child
+                } else if (node.hasOnlyRightChild()) {
+                    //if we delete the root, we make the node to the right the root;
+                    if (node == this.root) this.root = node.right;
+                    //left is less
+                    else if (val < parent.val) parent.left = node.right;
+                    //right if greater
+                    else parent.right = node.right;
+
+                    //or if it has both children
+                } else if (node.hasChildren()) {
+                    //if it has both children, we need to find the smallest value to the right of the tree
+                    var leftMost = this.goLeft(node.right);
+                    console.log(node.val);
+
+                    //we now add the left children of deleted node, to the left side of the right node
+                    leftMost.left = node.left;
+
+                    //now we replace the deleted node, with the node to the right
+                    if (val < parent.val) parent.left = node.right;
+                    else parent.right = node.right;
+
+                    //if its the root, we update the root
+                    if (this.root == node) this.root = node.right;
+                }
+                }
+            }
+
+            //------------------------------------------
+            
+            orderOutput(node, order) 
+            {                            //  Rekursiv alle Knoten des Baumes durchlaufen 
+                if(node == null)
+                {return;}
+                
+                if(order==Order.preorder)                           //  wurzel -> links -> rechts
+                {
+                    console.log(node.val);
+                    console.log(node.pos);                          /* Position des Knotens ausgeben*/
+                }
+                
+                this.orderOutput(node.left, order);
+                
+                if(order==Order.inorder)                           //  links -> wurzel -> rechts
+                {
+                    console.log(node.val);
+                    console.log(node.pos);                          /* Position des Knotens ausgeben*/
+                }
+                
+                this.orderOutput(node.right, order);
+                
+                    
+                if(order==Order.postorder)                           //  links -> rechts -> wurzel   
+                {
+                    console.log(node.val);
+                    console.log(node.pos);                          /* Position des Knotens ausgeben*/
+                    
+                }  
+            }
+            
+            //------------------------------------------
+            
+            orderOutputArray(node, order) 
+            {                            //  Rekursiv alle Knoten des Baumes durchlaufen 
+                if(node == null)
+                {return;}
+                
+                if(order==Order.preorder)                           //  wurzel -> links -> rechts
+                {
+                    this.positionen[this.counterPos] = node.pos;
+                    this.zeichen[this.counterPos] = node.val;
+                    this.counterPos++;
+                }
+                
+                this.orderOutputArray(node.left, order);
+                
+                if(order==Order.inorder)                           //  links -> wurzel -> rechts
+                {
+                    this.positionen[this.counterPos] = node.pos;
+                    this.zeichen[this.counterPos] = node.val;
+                    this.counterPos++;
+                }
+                
+                this.orderOutputArray(node.right, order);
+                
+                    
+                if(order==Order.postorder)                           //  links -> rechts -> wurzel   
+                {
+                    this.positionen[this.counterPos] = node.pos;
+                    this.zeichen[this.counterPos] = node.val;
+                    this.counterPos++;
+                    console.log("counter=" + this.counterPos);
+                }  
+            }
+            
+            //-------------------------------------------------
+            getPosArray(order)      // Gibt ein Array mit Knotenpositionen in der entsprechenden der Ordnung Ausgabereihenfolge zurück.
+            {
+                this.counterPos=0;
+                this.orderOutputArray(this.root, order);
+                return this.positionen;
+            }
+            //-------------------------------------------------
+            getZeichenArray()      // Gibt ein Array mit Knotenpositionen in der entsprechenden der Ordnung Ausgabereihenfolge zurück.
+            {
+                return this.zeichen;
+            }
+            //-------------------------------------------------
+
+            //--------------------------------------------------
+            
+            zeichneKnoten(posX, posY, zeichen, farbeRGB) 
+            {
+            this.context.beginPath();
+
+            this.context.strokeStyle = "black";
+            this.context.arc(posX, posY, 20, 0, 2 * Math.PI);    // Kreise mit einem Radius 20 zeichnen
+            this.context.fillStyle = farbeRGB;
+            this.context.lineWidth = 3;
+            this.context.stroke();
+            this.context.fill();
+            this.context.fillStyle = "black";
+            this.context.font = "25px calibri";
+            this.context.fillText(zeichen, posX - 11, posY + 11);
+                this.context.closePath();
+            }
+            
+            
+            //---------------------------------------------------
+            zeichneKante(startX, startY, endeX, endeY, farbeRGB) 
+            {
+            this.context.beginPath();
+            this.context.strokeStyle = farbeRGB;
+            this.context.moveTo(startX, startY);
+            this.context.lineTo(endeX, endeY);
+            this.context.lineWidth = 6;
+            this.context.stroke();
+                this.context.closePath();
+            }
+            
+            //---------------------------------------------------
+            
+            speechBubble(ctx, text, x, y) 
+            {
+                    var messure = ctx.measureText(text);
+                
+                    var w = messure.width;
+                    var h = 30;
+                
+                    ctx.beginPath();
+                    ctx.strokeStyle="black";
+                    ctx.lineWidth="2";
+                    ctx.fillStyle="rgb(255,255,0)";
+                
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + (w*0.2), y);
+                    ctx.lineTo(x + (w*0.2), y+10);
+                    ctx.lineTo(x + (w*0.3), y);
+                    ctx.lineTo(x + w, y);
+                
+                    ctx.quadraticCurveTo(x + (w*1.1), y, x + (w*1.1), y-(h*0.2)); // corner: right-bottom
+                
+                    ctx.lineTo(x + (w*1.1), y-(h*0.8)); // right
+                
+                    ctx.quadraticCurveTo(x + (w*1.1), y-h, x + w, y-h); // corner: right-top
+                
+                ctx.lineTo(x, y-h); // top
+                
+                    ctx.quadraticCurveTo(x - (w*0.1), y-h, x - (w*0.1), y-(h*0.8)); // corner: left-top
+                
+                    ctx.lineTo(x - (w*0.1), y-(h*0.2)); // left
+                
+                    ctx.quadraticCurveTo(x - (w*0.1), y, x, y); // corner: left-bottom
+                
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.closePath();
+                
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#000';
+                    ctx.fillText(text, x, y-6);
+            }
+            
+            //--------------------------------------------------------------------------------------
+            TextausgabeFenster(ctx, text, x, y) 
+            {
+                    ctx.beginPath();
+                    ctx.strokeStyle="black";
+                    ctx.lineWidth="2";
+                    ctx.fillStyle="rgb(255,255,0)";
+                
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + 850, y);
+                    ctx.lineTo(x + 850, y+60);
+                    ctx.lineTo(x, y+60);
+                ctx.lineTo(x, y);
+                
+                
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.closePath();
+                
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#000';
+                    ctx.fillText(text, x+10, y+30);
+            }
+            
+            //------------------------------------------------
+            //------------------------------------------------
+            
+            zeichneBaum()                                                                          // Zeichnet den Baum beim Start
+            {
+                
+            // Kanten Zeichnen
+            for (let i = 0; i < this.positionen.length; i++)
+                { 
+                if(this.baumbelegung[(2*this.positionen[i])+1] != 999)
+                    {
+                        this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[2 * this.positionen[i] + 1], this.knotenpositionenY[2 * this.positionen[i] + 1], "rgb(0,255,0)" );
+                    }
+                
+                if(this.baumbelegung[(2*this.positionen[i])+2] != 999)
+                    {
+            
+                        this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[2 * this.positionen[i] + 2], this.knotenpositionenY[2 * this.positionen[i] + 2], "rgb(0,255,0)" );
+                    } 
+                }
+                
+            // Knoten zeichnen
+                for (let i = 0; i < this.positionen.length; i++) 
+                {
+                    this.zeichneKnoten(this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.zeichen[i], "rgb(0,255,0)");
+                }
+            }
+            
+            //---------------------------------------------------
+            
+            zeichneBaumSchrittweise(step, order)                                                                   
+            {
+                
+                for (let i = 0; i < step; i++) 
+                {
+                    this.markiert[this.positionen[i]] = 1;                                                  // Position der Knoten im Baum als ausgegeben markiert.
+                }
+                
+                // ----------Kanten Zeichnen----------------
+                
+                if(order=='preorder')
+                {
+
+                    
+                    for (let i = 0; i < step; i++)
+                        { 
+                        // Kante zum Vaterknoten überprüfen und zeichnen
+                        if(this.baumbelegung[this.positionen[i]] != 999  && this.markiert[((this.positionen[i] + 1)/2)-1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[((this.positionen[i] + 1)/2)-1], this.knotenpositionenY[((this.positionen[i] + 1)/2)-1], "rgb(255,0,255)" );
+                            }
+                        
+                        // Kante zum 1.Kindknoten überprüfen und zeichnen
+                        if(this.baumbelegung[(2*this.positionen[i])+1] != 999  && this.markiert[(2*this.positionen[i])+1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+1], this.knotenpositionenY[(2*this.positionen[i])+1], "rgb(255,0,255)" );
+                            }
+                        
+                        
+                        // Kante zum 2.Kindknoten überprüfen und zeichnen      
+                        if(this.baumbelegung[(2*this.positionen[i])+2] != 999  && this.markiert[(2*this.positionen[i])+2] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+2], this.knotenpositionenY[(2*this.positionen[i])+2], "rgb(255,0,255)" );
+                            }
+                        }
+                }
+                
+                
+                if(order=='inorder')//
+                {
+            
+                    for (let i = 0; i < step; i++)
+                        { 
+                        // Kante zum Vaterknoten überprüfen und zeichnen
+                        if(this.baumbelegung[this.positionen[i]] != 999  && this.markiert[((this.positionen[i] + 1)/2)-1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[((this.positionen[i] + 1)/2)-1], this.knotenpositionenY[((this.positionen[i] + 1)/2)-1], "rgb(255,0,255)" );
+                            }
+                        
+                        // Kante zum 1.Kindknoten überprüfen und zeichnen
+                        if(this.baumbelegung[(2*this.positionen[i])+1] != 999  && this.markiert[(2*this.positionen[i])+1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+1], this.knotenpositionenY[(2*this.positionen[i])+1], "rgb(255,0,255)" );
+                            }
+                        
+                        
+                        // Kante zum 2.Kindknoten überprüfen und zeichnen      
+                        if(this.baumbelegung[(2*this.positionen[i])+2] != 999  && this.markiert[(2*this.positionen[i])+2] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+2], this.knotenpositionenY[(2*this.positionen[i])+2], "rgb(255,0,255)" );
+                            }
+                        }
+                }
+                
+                
+                if(order=='postorder')
+                {
+                    for (let i = 0; i < step; i++)
+                        { 
+                        // Kante zum Vaterknoten überprüfen und zeichnen
+                        if(this.baumbelegung[this.positionen[i]] != 999  && this.markiert[((this.positionen[i] + 1)/2)-1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[((this.positionen[i] + 1)/2)-1], this.knotenpositionenY[((this.positionen[i] + 1)/2)-1], "rgb(255,0,255)" );
+                            }
+                        
+                        // Kante zum 1.Kindknoten überprüfen und zeichnen
+                        if(this.baumbelegung[(2*this.positionen[i])+1] != 999  && this.markiert[(2*this.positionen[i])+1] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+1], this.knotenpositionenY[(2*this.positionen[i])+1], "rgb(255,0,255)" );
+                            }
+                        
+                        
+                        // Kante zum 2.Kindknoten überprüfen und zeichnen      
+                        if(this.baumbelegung[(2*this.positionen[i])+2] != 999  && this.markiert[(2*this.positionen[i])+2] == 1)     // 999 bedeutet, dass Position nicht belegt ist (Knoten nicht existiert)
+                            {
+                                this.zeichneKante( this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.knotenpositionenX[(2*this.positionen[i])+2], this.knotenpositionenY[(2*this.positionen[i])+2], "rgb(255,0,255)" );
+                            }
+                        }
+                }
+                
+                // ----------Knoten zeichnen----------------
+                    for (let i = 0; i < step; i++) 
+                        {
+                        this.zeichneKnoten(this.knotenpositionenX[this.positionen[i]], this.knotenpositionenY[this.positionen[i]], this.zeichen[i], "rgb(255,0,255)");
+                        this.markiert[this.positionen[i]] = 1;                                                  // Position der Knoten im Baum als ausgegeben markiert.
+                        }
+            }
+            
+            //-------------------------------------------------
+            
+            canvasLoeschen()
+            {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            
+            //---------------------------------------------------
+            
+            canvasFlaecheLoeschen(x, y, breite, hoehe)
+            {
+                this.context.clearRect(x, y, breite, hoehe);
+            }
+            
+            //------------------------------------------------
+            
+            Geschaft()
+            {
+                var x= 500, y=250;
+                this.context.beginPath();
+                    this.context.strokeStyle="black";
+                    this.context.lineWidth="2";
+                    this.context.fillStyle="rgb(255,255,0)";
+                
+                    this.context.moveTo(x, y);
+                    this.context.lineTo(x+850, y);
+                    this.context.lineTo(x+850, y+150);
+                    this.context.lineTo(x, y+150);
+                    this.context.lineTo(x, y);
+                    
+                    this.context.fill();
+                    this.context.stroke();
+                    this.context.closePath();
+                
+                    this.context.textAlign = 'left';
+                    this.context.fillStyle = '#000';
+                    this.context.fillText("Sie haben es geschafft. Gratulation!", x+20, y+30);
+                this.context.fillText("Wenn Sie weiter versuchen möchten, klicken Sie auf 'Binärbaum neu generieren'", x+20, y+60);
+                this.context.fillText("oder wählen Sie eine andere Ordnung.", x+20, y+90);
+            }
+            
+            //------------------------------------------------
+            }
+        </script>
+
+
+        <script>
+//================================================================= main ========================================================================================================================================
+
+                // Meldungen:
+                let Text1 ="         Clicken Sie auf den nächsten Knoten             ";
+                let Text2 ="Das war leider Falsch! Bitte versuchen Sie es noch einmal";  
+                let Text3 ="                     Richtig!                            ";
+                let Text4 ="      Richtig! Clicken Sie auf den nächsten Knoten       ";
+
+
+                var fehlercounter = 0;
+
+
+
+
+
+                let ordnung = 'preorder';                                                            // aktuelle Ordnung, per defaul soll preorder eigestellt
+                var x_Koordinate;                                                                     // x-Koordinate des Mauszeigers
+                var y_Koordinate;                                                                     // y-Koordinate des Mauszeigers
+                
+                let step=0;                                                                                      
+                let baumgroesse;
+
+                let zustand = -1;
+                // Mögliche Zustände: 0-Start(Anfang)
+                //                    1-Abfrage läuft
+                //                    2-Ende
+
+                var zufallszahlen = new Array();
+
+
+                var tree = new BinaryTreeR(); 
+                
+                window.onload = init;                                                                                   // Beim Laden des Fenster, wird die Funktion init() ausgeführt
+
+                //-----------------------------------------------------------------------------------------------------------------------
+
+                function MausBewegungsHandler(event) 
+                {
+                    x_Koordinate = event.pageX;                                                                     // x-Koordinate des Mauszeigers auslesen
+                    y_Koordinate = event.pageY;                                                                     // y-Koordinate des Mauszeigers auslesen
+                    SwitchCase();
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------
+
+                function StartButton() 
+                {
+                    if(zustand != 2)
+                    {
+                        zustand = 0;
+                        SwitchCase();
+                    }
+
+                }
+                
+
+
+                //--------------------------------------------------------------------------------------------------------------------------
+
+                function init() 
+                {   
+                    tree.canvas.onclick = MausBewegungsHandler;                                                           // Handler definieren 
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------
+
+
+
+                function SwitchCase()
+                {
+                        switch(zustand)
+                        {
+                            
+                            case 0: 
+                            tree.TextausgabeFenster(tree.context,Text1, 20, 650); zustand=1;    
+                            break;
+                            
+                            
+                            
+                            case 1: 
+                            if(istRichtig(x_Koordinate, y_Koordinate))
+                                {
+                                    tree.TextausgabeFenster(tree.context,Text4, 20, 650);
+                                    zustand=1;
+                                    step++;
+                                    tree.zeichneBaumSchrittweise(step, ordnung);                                                    //
+                                    tree.canvasFlaecheLoeschen(895, 645, 860, 70)     // Löschen des Info-Fensters
+                                    if(step==baumgroesse)
+                                    {
+                                        step=0;
+                                        zustand=2;                                    // Ende Zustand =2
+                                        tree.Geschaft(); 
+                                    }
+                                }
+                            else 
+                            {
+                                    fehlercounter++;                                          // Fehler hochzählen
+                                    tree.TextausgabeFenster(tree.context,Text2, 20, 650); 
+                                    zustand=1;
+                                    if(fehlercounter==3)
+                                    {
+                                        InfoBox();
+                                        fehlercounter=0;                                      // den Fehlerzähler reseten
+                                    };
+                            }
+                            break;
+                            
+
+                        }
+                }
+
+
+
+                //----------------------------------------------------------------------------------------------------------------------------------
+
+                function istRichtig(xKnoten, yKnoten)
+                {
+                let radius=25;
+                if(xKnoten-30 > tree.knotenpositionenX[tree.positionen[step]]- radius && xKnoten-30 < tree.knotenpositionenX[tree.positionen[step]]+ radius  && yKnoten-96 > tree.knotenpositionenY[tree.positionen[step]] - radius && yKnoten-96 < tree.knotenpositionenY[tree.positionen[step]] + radius  )
+                    {
+                    return true;
+                    }
+                else return false;
+                }
+
+
+                //--------------------------------------------------------------------------------------------------------------------------------
+
+                function zahlenAuswuerfeln()
+                {
+                var min = 0, max = 99, n = 0, z = 0;	
+                    
+                let wiederholung = false;
+                while(n!=40)
+                {
+                    wiederholung = false;
+                    z = Math.floor(Math.random() * (max - min + 1)) + min;    // Zufallszahlen generieren
+                    
+                    for(let i=0; i<40;i++)                                                     // Prüfen ob gkeiche zahl bereits ausgewürfelt wurde
+                        {
+                        if(z==zufallszahlen[i])
+                        {
+                            wiederholung=true;
+                            n--;
+                            break;
+                        }
+                        }
+                    if(!wiederholung)
+                    {
+                        zufallszahlen[n] = z;
+                        n++;
+                    }
+                }
+                }
+                //----------------------------------------------------------------------------------------------------------------------------------
+
+
+                function BaumGenerierenButton() 
+                {
+                    step=0;
+                    tree = new BinaryTreeR();
+                    zufallszahlen = new Array();
+                    zahlenAuswuerfeln();
+                    zustand = -1;
+                    
+                    for(let i=0;i<40;i++)
+                    {
+                        tree.add(zufallszahlen[i]);
+                    }
+
+                    tree.orderOutputArray(tree.root, ordnung);
+                    tree.canvasLoeschen();
+                    tree.zeichneBaum();
+                    baumgroesse=tree.positionen.length;
+                }
+                //-----------------------------------------------------------------------------------------------------------------------------------
+                function RadioButtonPostfixChecked()
+                {
+                    step=0;
+                    tree = new BinaryTreeR();
+                    zufallszahlen = new Array();
+                    zahlenAuswuerfeln();
+                    zustand = -1;
+                    for(let i=0;i<40;i++)
+                    {
+                        tree.add(zufallszahlen[i]);
+                    }
+
+                    tree.orderOutputArray(tree.root, 'postorder');
+                    tree.canvasLoeschen();
+                    tree.zeichneBaum();
+                    baumgroesse=tree.positionen.length;
+                    ordnung='postorder';
+                }
+                //------------------------------------------------------------------------------------------------------------------------------------
+                function RadioButtonPrefixChecked()
+                {
+                    step=0;
+                    tree = new BinaryTreeR();
+                    zufallszahlen = new Array();
+                    zahlenAuswuerfeln();
+                    zustand = -1;
+                    for(let i=0;i<40;i++)
+                    {
+                        tree.add(zufallszahlen[i]);
+                    }
+
+                    tree.orderOutputArray(tree.root, 'preorder');
+                    tree.canvasLoeschen();
+                    tree.zeichneBaum();
+                    baumgroesse=tree.positionen.length;
+                    ordnung='preorder';
+                }
+                //------------------------------------------------------------------------------------------------------------------------------------
+                function RadioButtonInfixChecked()
+                {
+                    step=0;
+                    tree = new BinaryTreeR();
+                    zufallszahlen = new Array();
+                    zahlenAuswuerfeln();
+                    zustand = -1;
+                    for(let i=0;i<40;i++)
+                    {
+                        tree.add(zufallszahlen[i]);
+                    }
+
+                    tree.orderOutputArray(tree.root, 'inorder');
+                    tree.canvasLoeschen();
+                    tree.zeichneBaum();
+                    baumgroesse=tree.positionen.length;
+                    ordnung='inorder';
+                }
+                //-------------------------------------------------------------------------------------------------------------------------------------
+
+                function InfoBox()
+                {
+                let textPreorder  ="Zuerst wird die Wurzel verarbeitet, dann werden die Teilbäume verarbeitet.";
+                let textPostorder ="Zuerst werden die Teilbäume verarbeitet, dann wird die Wurzel verarbeitet.";
+                let textInorder   ="Zuerst wird der linke, dann die Wurzel und dann der rechte Teilbaum verarbeitet.";
+                
+                if(ordnung=='preorder')
+                    {
+                    tree.TextausgabeFenster(tree.context,textPreorder, 900, 650) 
+                    }
+                if(ordnung=='inorder')
+                    {
+                    tree.TextausgabeFenster(tree.context,textInorder, 900, 650) 
+                    }
+                if(ordnung=='postorder')
+                    {
+                    
+                    tree.TextausgabeFenster(tree.context,textPostorder, 900, 650) 
+                    }
+                
+                }
+
+
+
+
+                //-------------------------------------------------------------------------------------------------------------------------------------
+
+                zahlenAuswuerfeln();
+
+                for(let i=0;i<40;i++)
+                {
+                    tree.add(zufallszahlen[i]);
+                }
+
+                tree.orderOutputArray(tree.root, ordnung);
+                tree.zeichneBaum();
+                baumgroesse=tree.positionen.length;
+
+                //InfoBox();
+                //tree.Geschaft();              
+                for(let i=0;i<14;i++)
+                {
+                    console.log("preorder: i=" + i + "  " + "Position=" + tree.positionen[i]);
+                }
+
+
+// ============================================================================================================================================================================================
+
+     </script>
+
+
+
+
+
+     
+     
+  <p style="text-align: right;"> <small> Hochschule Hamm-Lippstadt, Studiengang Mechatronik, 2021 </small> </p>
+  </body>
+  
+ 
+</html>

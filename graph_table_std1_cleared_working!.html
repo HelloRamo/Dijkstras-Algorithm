@@ -90,7 +90,7 @@
                 });
        
 
-//========================================================================= Dijkstra PriorityQueue  ========================================================================================================
+//========================================================================= Dijkstra Priority queue  ========================================================================================================
 
                 class PriorityQueue { 
                     constructor() {     // constructor initializes an empty queue
@@ -110,49 +110,49 @@
                     }
 
                     isEmpty() {
-                        return this.queue.length === 0;
+                        return this.queue.length === 0; 
                     }
 
-                    sort() {
-                        this.queue.sort((a, b) => a.priority - b.priority);
+                    sort() { // output difference of priority and sort -> if negative, a has a higher priority than b
+                        this.queue.sort((a, b) => a.priority - b.priority); 
                     }
                 }
-                function dijkstra(start) {
-                    const distances = {};
-                    const prev = {};
-                    const priorityQueue = new PriorityQueue();
+                function dijkstra(start) { 
+                    const distances = {};        // shortest dist from start to each node
+                    const prev = {};             // prev node in the shortest path to each node
+                    const priorityQueue = new PriorityQueue();      // manages the visited nodes
 
-                    Object.keys(nodes).forEach(node => {
+                    Object.keys(nodes).forEach(node => {  // iterates over nodes and sets starting parameter
                         distances[node] = Infinity;
                         prev[node] = null;
                     });
 
-                    distances[start] = 0;
-                    priorityQueue.enqueue(start, 0);
+                    distances[start] = 0; // distance start node to itself
+                    priorityQueue.enqueue(start, 0); // adds start node to pq with rank 0
 
-                    while (!priorityQueue.isEmpty()) {
-                        let current = priorityQueue.dequeue();
+                    // Dijsktras Algorithm 
+                    while (!priorityQueue.isEmpty()) { // sets condition while loop true if not empty! -!
+                        let current = priorityQueue.dequeue(); // dequeues curr highest pq node
 
-                        edges.filter(edge => edge.from === current || edge.to === current).forEach(edge => {
-                            let otherNode = edge.from === current ? edge.to : edge.from;
-                            let weight = edge.weight;
+                    // iterates over edges and filters only conencted nodes to current node
+                        edges.filter(edge => edge.from === current || edge.to === current).forEach(edge => { 
+                            let otherNode = edge.from === current ? edge.to : edge.from; // checks "from" "to" edges of nodes
+                            let weight = edge.weight; // retreives weight curr edge
 
-                            if (distances[current] + weight < distances[otherNode]) {
-                                distances[otherNode] = distances[current] + weight;
+                            if (distances[current] + weight < distances[otherNode]) { // if true shorter path is found
+                                distances[otherNode] = distances[current] + weight;   // updates with shorter path
                                 prev[otherNode] = current;
-                                priorityQueue.enqueue(otherNode, distances[otherNode]);
+                                priorityQueue.enqueue(otherNode, distances[otherNode]); // enqueues with updated distance
                             }
                         });
                     }
 
                     return { distances, prev };
                 }
-
-
-        // starting from A shortest path is stored in variable result
-        const result = dijkstra('A');
+                
+      const result = dijkstra('A');  // dijkstra starts from node A and sets return values from it 
         
-        // Drawing a line between two nodes to represent the edge.
+     // Drawing a line between two nodes to represent the edge.
         edges.forEach(edge => {
             ctx.beginPath();
             ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
@@ -177,7 +177,7 @@
             ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
         }
                 
-
+//========================================================================= table canvas ========================================================================================================
  </script>
 <!DOCTYPE html>
 <html lang="en">
