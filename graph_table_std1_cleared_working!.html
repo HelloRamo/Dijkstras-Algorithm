@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Shortest path Dijkstra algorithm by Ramo</title>
-    <style>  
+</head>
+
+    <body>
+        <style>  
         body {
             margin: 0;
             display: flex;
@@ -27,25 +30,36 @@
             margin-top: 20px;
             font-family: Arial;
         }
-        #distanceTable, #distanceTable th, #distanceTable td {
-            border: 1px solid black; border-collapse: collapse; padding: 5px;
-        }
-        #distanceTable {
-            margin-bottom: 20px;
-        }
-        input {
-            margin-right: 10px;
-        }
-    </style>
-</head>
 
-<body>
-    <div id="mainContainer"> 
+        #distanceTable, #distanceTable th, #distanceTable td { border: 1px solid black; border-collapse: collapse; padding: 15px; }
+        #distanceTable { 
+            position: relative; /*  fixes the position of the element relative to the browser window */
+            top: 10; /* Specifies distance from top of window */
+            right: 50; /* Specifies distance from right of window */
+            margin-bottom: 20px; 
+        }
+        
+        input { margin-right: 12px; }
+        #canvasContainer {
+            flex: 1;
+        }
+        #tableContainer {
+            flex: 1;
+        }
+        #mainContainer {
+            display: flex;
+            justify-content: center; /* Center the flex items horizontally */
+            align-items: start; /* Align the flex items to the top */
+        }
+        </style>
+
+        <div id="mainContainer"> 
         <canvas id="graphCanvas" width="800" height="600"></canvas>
         <div id="inputOutputContainer"> 
             <div id="outputDiv"></div> 
         
-            <script> // contains the graph and the table
+        <script> // contains the graph and the table
+
                 let canvas = document.getElementById('graphCanvas');
                 let ctx = canvas.getContext('2d');
                 let outputDiv = document.getElementById('output');
@@ -108,7 +122,7 @@
                     edge.weight = Math.floor(Math.random() * 10 + 1);
                 });
                 
-//========================================================================= Dijkstra Priority queue  ========================================================================================================
+                    //========================================================================= Dijkstra Priority queue  ========================================================================================================
 
                 class PriorityQueue { 
                     constructor() {     // constructor initializes an empty queue
@@ -194,42 +208,14 @@
             ctx.font = '20px Arial';
             ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
         }
+   
                 
 //========================================================================= table canvas ========================================================================================================
-</script>
+         </script>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"> <!-- Declare character encoding for the HTML document -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Set the viewport width to device width and initial zoom to 1 -->
-    <title>Graph Shortest Path Input</title>
-    <!-- Provide styling for the HTML elements -->
-    <style> 
-        #distanceTable, #distanceTable th, #distanceTable td { border: 1px solid black; border-collapse: collapse; padding: 15px; }
-        #distanceTable { 
-            position: relative; /*  fixes the position of the element relative to the browser window */
-            top: 10; /* Specifies distance from top of window */
-            right: 50; /* Specifies distance from right of window */
-            margin-bottom: 20px; 
-        }
-        input { margin-right: 12px; }
-        #canvasContainer {
-            flex: 1;
-        }
-        #tableContainer {
-            flex: 1;
-        }
-        #mainContainer {
-            display: flex;
-            justify-content: center; /* Center the flex items horizontally */
-            align-items: start; /* Align the flex items to the top */
-        }
-    </style>
-
-        <div id="tableContainer">
-            <h3>Enter the shortest distances from node A to each node:</h3>
-            <table id="distanceTable"> <!-- Define a table to capture user inputs -->
+            <div id="tableContainer">
+                <h3>Enter the shortest distances from node A to each node:</h3>
+                <table id="distanceTable"> <!-- Define a table to capture user inputs -->
                 <tr>
                     <th>Knoten</th>
                     <th>Kosten</th>
@@ -369,49 +355,46 @@
                 </tr>
             </table>
         </div>
-    </div>
-</body>
-</html>
     
-<script>
-    const startNode = 'A';
-    const dijkstraResult = dijkstra(startNode);
-    var correctDistances = result.distances;
-var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
+        <script>
+            const startNode = 'A';
+            const dijkstraResult = dijkstra(startNode);
+            var correctDistances = result.distances;
+            var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
 
-// This function verifies user input against the correct distances
-function validateInput(node) {
-    var userInput = document.getElementById('distanceTo' + node).value;
-    var distanceTable = document.getElementById('distanceTable');
+            // This function verifies user input against the correct distances
+        function validateInput(node)  {
+            var userInput = document.getElementById('distanceTo' + node).value;
+            var distanceTable = document.getElementById('distanceTable');
 
-    // If the user input is correct, store it and give feedback
-    if (correctDistances[node] == userInput) {
-        userAnswers[node] = userInput;
-        alert('Correct! The distance to node ' + node + ' is ' + userInput + '.'); // Alert for correct input
-        if (Object.keys(userAnswers).length === Object.keys(correctDistances).length + 1) {
-            displayResults();
-        } else {
-            var nextNode = String.fromCharCode('A'.charCodeAt(0) + Object.keys(userAnswers).length);
-            var nextInput = document.getElementById('distanceTo' + nextNode);
-            if (nextInput) {
-                nextInput.focus();
+            // If the user input is correct, store it and give feedback
+            if (correctDistances[node] == userInput) {
+                userAnswers[node] = userInput;
+                alert('Correct! The distance to node ' + node + ' is ' + userInput + '.'); // Alert for correct input
+                if (Object.keys(userAnswers).length === Object.keys(correctDistances).length + 1) {
+                    displayResults();
+                } else {
+                    var nextNode = String.fromCharCode('A'.charCodeAt(0) + Object.keys(userAnswers).length);
+                    var nextInput = document.getElementById('distanceTo' + nextNode);
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                }
+            } else {
+                alert('Incorrect for node ' + node + '. Try again.'); // If  wrong, prompt for another try
             }
         }
-    } else {
-        alert('Incorrect for node ' + node + '. Try again.'); // If  wrong, prompt for another try
-    }
-}
 
-// This function displays the user's entered distances at the end
-function displayResults() {
-    var message = document.createElement('div');
-    message.innerHTML = '<strong>Shortest distances from A:</strong><br>';
-    Object.keys(userAnswers).sort().forEach(function(node) {
-        message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
-    });
-    distanceTable.parentNode.insertBefore(message, distanceTable.nextSibling);
-}
-</script>
+        // This function displays the user's entered distances at the end
+        function displayResults() {
+            var message = document.createElement('div');
+            message.innerHTML = '<strong>Shortest distances from A:</strong><br>';
+            Object.keys(userAnswers).sort().forEach(function(node) {
+                message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
+            });
+            distanceTable.parentNode.insertBefore(message, distanceTable.nextSibling);
+        }
+        </script>
 
-</body>
+    </body>
 </html>

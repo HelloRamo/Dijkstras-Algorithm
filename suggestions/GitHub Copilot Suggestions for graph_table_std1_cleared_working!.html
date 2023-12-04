@@ -1,0 +1,342 @@
+Synthesizing 10/10 solutions
+
+=======
+Suggestion 1
+
+```
+
+coldwoodness 2021-11-06: The problem is that you have two HTML documents in one file. That is not allowed.
+You should have only one HTML document, and in that document you can have only one `head` element and one `body` element.
+So move the content of the second `head` element to the first one, and move the content of the second `body` element to the first one. Then remove the duplicate `head` and `body` elements.
+
+=======
+Suggestion 2
+
+```
+
+coldwoodness 2021-11-06: You can use a `Map` instead of an object for the `prev` variable. Maps do not convert their keys to string, so you can use the node objects as keys, and then you can use the `get` method to retrieve the value for a given node:
+```
+const prev = new Map; // <--- make it a Map
+
+// ...etc
+
+if (distances[current] + weight < distances[otherNode]) {
+    distances[otherNode] = distances[current] + weight;
+    prev.set(otherNode, current); // <--- store the node object
+    priorityQueue.enqueue(otherNode, distances[otherNode]);
+}
+```
+Then, when you need to get the previous node, you can use the `get` method:
+```
+let otherNode = edge.from === current ? edge.to : edge.from;
+let weight = edge.weight;
+
+if (distances[current] + weight < distances[otherNode]) {
+    distances[otherNode] = distances[current] + weight;
+    prev.set(otherNode, current);
+    priorityQueue.enqueue(otherNode, distances[otherNode]);
+}
+```
+And when you need to get the previous node, you can use the `get` method:
+```
+let node = 'J';
+while (node) {
+    console.log(node);
+    node = prev.get(node);
+}
+```
+
+=======
+Suggestion 3
+
+```
+
+Pepisciouswww3 2020-07-28: > I am trying to display the result in a table, but I don't know how to do it.
+This is how you can create a table in JavaScript:
+```
+const table = document.createElement('table');
+```
+This is how you can add a row to a table:
+```
+const row = table.insertRow();
+```
+This is how you can add a cell to a row:
+```
+const cell = row.insertCell();
+```
+This is how you can add text to a cell:
+```
+cell.textContent = 'Some text';
+```
+This is how you can add a table to the DOM:
+```
+document.body.appendChild(table);
+```
+
+=======
+Suggestion 4
+
+```
+
+OP 2021-01-04: I found the solution myself. I just had to add a line of code in the validateInput() function. Now the user input is correctly checked with the correct distances. The code is as follows:
+```
+function validateInput(node) {
+    var userInput = document.getElementById('distanceTo' + node).value;
+    var distanceTable = document.getElementById('distanceTable');
+
+    if (correctDistances[node] == userInput) {
+        userAnswers[node] = userInput;
+        alert('Correct! The distance to node ' + node + ' is ' + userInput + '.');
+        if (Object.keys(userAnswers).length === Object.keys(correctDistances).length + 1) {
+            displayResults();
+        } else {
+            var nextNode = String.fromCharCode('A'.charCodeAt(0) + Object.keys(userAnswers).length);
+            var nextInput = document.getElementById('distanceTo' + nextNode);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    } else {
+        alert('Incorrect for node ' + node + '. Try again.');
+    }
+    if (userInput === '') { // This line of code was missing
+        alert('Please enter a value for node ' + node + '.');
+    }
+}
+```
+
+=======
+Suggestion 5
+
+```
+
+coldwoodness 2021-04-11: Some issues:
+
+The function `dijkstra` is never called. So the variable `result` is never assigned a value.
+
+The function `dijkstra` returns an object with two properties: `distances` and `prev`. But you only use the first of those two properties. So `result` is an object, not a number.
+
+The function `dijkstra` expects a string as argument, but you pass a number. So you should pass "A" instead of `0`.
+
+=======
+Suggestion 6
+
+```
+
+coldwoodness 2021-07-25: You can use a `Map` instead of an object for the `userAnswers` variable. This will allow you to sort the entries by key. You can then also use `map` to convert the entries to a string, and `join` to concatenate them.
+So replace this:
+```
+var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
+```
+with:
+```
+var userAnswers = new Map([['A', 0]]); // Create a dictionary to store user inputs
+```
+and then replace this:
+```
+Object.keys(userAnswers).sort().forEach(function(node) {
+    message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
+});
+```
+with:
+```
+message.innerHTML += [...userAnswers].sort(([a], [b]) => a.localeCompare(b))
+    .map(([node, value]) => `Node ${node}: ${value}`).join("<br>");
+```
+
+=======
+Suggestion 7
+
+```
+
+coldwoodness 2021-06-27: There are several issues:
+
+The `dijkstra` function is not returning the correct results. It should return the distances and the previous nodes. So change:
+```
+return { distances, prev };
+```
+to:
+```
+return { distances, prev };
+```
+
+The `validateInput` function is not correctly using the `correctDistances` object. It should not use `correctDistances[node]` but `correctDistances[node].distance` and `correctDistances[node].prev`. Also the `userAnswers` object should not store the distances, but the nodes. So change:
+```
+userAnswers[node] = userInput;
+```
+to:
+```
+userAnswers[node] = node;
+```
+and change:
+```
+if (correctDistances[node] == userInput) {
+```
+to:
+```
+if (correctDistances[node].distance == userInput) {
+```
+and change:
+```
+var nextNode = String.fromCharCode('A'.charCodeAt(0) + Object.keys(userAnswers).length);
+```
+to:
+```
+var nextNode = correctDistances[node].prev;
+```
+
+The `displayResults` function is not correctly using the `userAnswers` object. It should not use `userAnswers[node]` but `userAnswers[node].distance`. So change:
+```
+message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
+```
+to:
+```
+message.innerHTML += 'Node ' + node + ': ' + userAnswers[node].distance + '<br>';
+```
+
+The `displayResults` function should not use `Object.keys(userAnswers).sort()` but `Object.keys(userAnswers)`. So change:
+```
+Object.keys(userAnswers).sort().forEach(function(node) {
+```
+to:
+```
+Object.keys(userAnswers).forEach(function(node) {
+```
+
+The `displayResults` function should not use `userAnswers[node]` but `userAnswers[node].distance`. So change:
+```
+userAnswers[node] = userInput;
+```
+to:
+```
+userAnswers[node] = {distance: userInput};
+```
+
+The `displayResults` function should not use `userAnswers[node]` but `userAnswers[node].prev`. So change:
+```
+var nextNode = correctDistances[node].prev;
+```
+to:
+```
+var nextNode = userAnswers[node].prev;
+```
+
+=======
+Suggestion 8
+
+```
+
+coldwoodness 2020-12-26: You can use a `for` loop to iterate over the characters in the alphabet, and then use the result of that iteration to perform the actions that you currently repeat in your code for each node.
+So, instead of this:
+```
+const result = dijkstra('A');
+var correctDistances = result.distances;
+var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
+
+// This function verifies user input against the correct distances
+function validateInput(node) {
+    var userInput = document.getElementById('distanceTo' + node).value;
+    var distanceTable = document.getElementById('distanceTable');
+
+    // If the user input is correct, store it and give feedback
+    if (correctDistances[node] == userInput) {
+        userAnswers[node] = userInput;
+        alert('Correct! The distance to node ' + node + ' is ' + userInput + '.'); // Alert for correct input
+        if (Object.keys(userAnswers).length === Object.keys(correctDistances).length + 1) {
+            displayResults();
+        } else {
+            var nextNode = String.fromCharCode('A'.charCodeAt(0) + Object.keys(userAnswers).length);
+            var nextInput = document.getElementById('distanceTo' + nextNode);
+            if (nextInput) {
+                nextInput.focus();
+            }
+        }
+    } else {
+        alert('Incorrect for node ' + node + '. Try again.'); // If  wrong, prompt for another try
+    }
+}
+
+// This function displays the user's entered distances at the end
+function displayResults() {
+    var message = document.createElement('div');
+    message.innerHTML = '<strong>Shortest distances from A:</strong><br>';
+    Object.keys(userAnswers).sort().forEach(function(node) {
+        message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
+    });
+    distanceTable.parentNode.insertBefore(message, distanceTable.nextSibling);
+}
+```
+... you would have this:
+```
+const result = dijkstra('A');
+const correctDistances = result.distances;
+const userAnswers = {};
+
+// This function verifies user input against the correct distances
+function validateInput(node) {
+    const userInput = document.getElementById('distanceTo' + node).value;
+    const distanceTable = document.getElementById('distanceTable');
+
+    // If the user input is correct, store it and
+
+=======
+Suggestion 9
+
+```
+
+coldwoodness 2021-07-15: You could do this with a `Map` instance, which is a collection of key/value pairs. The key would be the node name, and the value would be the distance.
+So instead of this:
+```
+var correctDistances = result.distances;
+var userAnswers = {'A': 0}; // Create a dictionary to store user inputs
+```
+... you would do this:
+```
+var userAnswers = new Map; // Create a map to store user inputs
+```
+And then instead of this:
+```
+if (correctDistances[node] == userInput) {
+    userAnswers[node] = userInput;
+```
+... you would do this:
+```
+if (correctDistances[node] == userInput) {
+    userAnswers.set(node, userInput);
+```
+And instead of this:
+```
+if (Object.keys(userAnswers).length === Object.keys(correctDistances).length + 1) {
+```
+... you would do this:
+```
+if (userAnswers.size === Object.keys(correctDistances).length + 1) {
+```
+And instead of this:
+```
+Object.keys(userAnswers).sort().forEach(function(node) {
+    message.innerHTML += 'Node ' + node + ': ' + userAnswers[node] + '<br>';
+});
+```
+... you would do this:
+```
+Array.from(userAnswers.keys()).sort().forEach(function(node) {
+    message.innerHTML += 'Node ' + node + ': ' + userAnswers.get(node) + '<br>';
+});
+```
+
+=======
+Suggestion 10
+
+```
+
+coldwoodness 2021-05-18: You can use the following `for` loop to make the table:
+```
+let table = document.createElement("table");
+for (let node in result.distances) {
+    let row = table.insertRow();
+    row.insertCell().textContent = node;
+    row.insertCell().textContent = result.distances[node];
+}
+outputDiv.append(table);
+```
