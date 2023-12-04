@@ -181,31 +181,31 @@
 
                     return { distances,prev};                                                                           // prev has no further function -> const prev = new map() ...
                 }
-        
-        // Drawing a line between two nodes to represent the edge.
-        edges.forEach(edge => {
-            ctx.beginPath();
-            ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
-            ctx.lineTo(nodes[edge.to].x, nodes[edge.to].y);
-            ctx.stroke();
-            let midX = (nodes[edge.from].x + nodes[edge.to].x) / 2;
-            let midY = (nodes[edge.from].y + nodes[edge.to].y) / 2;
-            ctx.font = '20px Arial';
-            ctx.fillText(edge.weight, midX, midY);
-        });
-        
-        // Drawing the nodes as circles
-        for (let node in nodes) {
-            ctx.beginPath();
-            ctx.arc(nodes[node].x, nodes[node].y, 20, 0, 2 * Math.PI);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = 'black';
-            ctx.stroke();
-            ctx.fillStyle = 'black';
-            ctx.font = '20px Arial';
-            ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
-        }
+                
+                // Drawing a line between two nodes to represent the edge.
+                edges.forEach(edge => {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
+                    ctx.lineTo(nodes[edge.to].x, nodes[edge.to].y);
+                    ctx.stroke();
+                    let midX = (nodes[edge.from].x + nodes[edge.to].x) / 2;
+                    let midY = (nodes[edge.from].y + nodes[edge.to].y) / 2;
+                    ctx.font = '20px Arial';
+                    ctx.fillText(edge.weight, midX, midY);
+                });
+                
+                // Drawing the nodes as circles
+                for (let node in nodes) {
+                    ctx.beginPath();
+                    ctx.arc(nodes[node].x, nodes[node].y, 20, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                    ctx.strokeStyle = 'black';
+                    ctx.stroke();
+                    ctx.fillStyle = 'black';
+                    ctx.font = '20px Arial';
+                    ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
+                }
    
                 
 //========================================================================= table canvas ========================================================================================================
