@@ -40,12 +40,12 @@
 </head>
 
 <body>
-    <div id="mainContainer">
+    <div id="mainContainer"> // This div contains the graph and the table
         <canvas id="graphCanvas" width="800" height="600"></canvas>
-        <div id="inputOutputContainer">
-            <div id="outputDiv"></div>
+        <div id="inputOutputContainer"> // This div contains the table and the output
+            <div id="outputDiv"></div> 
         
-                <script>
+            <script> // contains the graph and the table
                 let canvas = document.getElementById('graphCanvas');
                 let ctx = canvas.getContext('2d');
                 let outputDiv = document.getElementById('output');
@@ -84,7 +84,7 @@
                     { from: 'H', to: 'J' },
                     { from: 'I', to: 'J' },
                 ];
-
+                
                 edges.forEach(edge => {
                     edge.weight = Math.floor(Math.random() * 31 + 1);
                 });

@@ -1,0 +1,1061 @@
+
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+     <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <title>HANOI</title>
+  </head>
+
+  <body>
+    <h2> Türme von Hanoi </h2>
+    <h3> Spielregeln: Die Aufgabe besteht darin, alle Scheiben von der silbernen zur goldenen Säule zu transportieren. <br />
+         Es darf immer nur eine Scheibe gleichzeitig bewegt werden. Die bewegte Scheibe darf nicht auf eine kleinere Scheibe gesteckt werden. </h3>
+    <canvas id="leinwand" width="1600" height="600"></canvas><br />
+    <p>
+      <button onclick="Weiter()"> WEITER    </button> 
+      <button onclick="Zurueck()"> ZURÜCK   </button>       
+      <button onclick="Reset()">  RESET     </button> 
+      
+      <label for="anzahl"><b>Anzahl der Scheiben (3-10):</b></label>
+      <input type="number" id="anzahl" name="anzahl" min="3" max="10" value="3">
+    </p> 
+    
+    <script>
+      //========================================================================= stack ========================================================================================================
+      class Stack					// class to implement stack data structure
+	  {
+			constructor() 
+		    {
+				this.items = [];
+			}
+ 
+			add(element)			// add element to the stack 
+			{
+				return this.items.push(element);
+			}
+          
+			remove()				// remove element from the stack
+			{
+				if(this.items.length > 0) 
+				{
+					return this.items.pop();
+				}
+			}
+          
+			peek()					// view the last element
+			{
+				return this.items[this.items.length - 1];
+			}
+          
+			isEmpty()				// check if the stack is empty
+			{
+				return this.items.length == 0;
+			}
+         
+			size()					// the size of the stack 
+			{
+				return this.items.length;
+			}
+       
+			clear()					// empty the stack
+			{
+              this.items = [];
+			}
+      }
+	</script>
+
+ <script>
+//============================================================================ hanoi.js =========================================================================================
+class hanoi
+  {
+    constructor(k) 
+    {
+      /*-----------------------Variablen für die Option 'selbst spielen'--------------------------*/
+      this.anzahlScheibenSpiel = k;
+      
+      this.zustandScheibeSaeuleSpiel = new Array();
+      this.zustandScheibePosSpiel = new Array();      
+      
+      for(let i = 0; i<this.anzahlScheibenSpiel; i++)
+      {
+        this.zustandScheibeSaeuleSpiel[i] = 1;                               // Alle Scheiben auf die Saeule 1 legen// -1 Keine Saeule  
+      }
+      
+      for(let i = 0; i<this.anzahlScheibenSpiel; i++)
+      {
+        this.zustandScheibePosSpiel[i] = this.anzahlScheibenSpiel - (i+1);   // Position der einzelnen Scheiben festlegen, zuerst befinden sich die Scheiben auf der Saeule 1 in der Reihenfolge 0 (oben) - 9 (unten)
+      }
+      
+      // Reihenfolge der Scheiben hier merken
+      this.turmStackScheiben_1 = new Stack();
+      this.turmStackScheiben_2 = new Stack();
+      this.turmStackScheiben_3 = new Stack();
+      
+      // Reihenfolge der Positionen auf den Türmen hier merken
+      this.turmStackPositionenVonScheiben_1 = new Stack();
+      this.turmStackPositionenVonScheiben_2 = new Stack();
+      this.turmStackPositionenVonScheiben_3 = new Stack();
+      
+      for(var i = this.anzahlScheibenSpiel-1; i>-1; i--)                     // Elemente in der richtigen Reihenfolge auf dem Stack legen
+      {
+         this.turmStackScheiben_1.add(i); 
+      }
+      
+      for(var i = 0; i<this.anzahlScheibenSpiel; i++)                         // Elemente in der richtigen Reihenfolge auf dem Stack legen
+      {
+         this.turmStackPositionenVonScheiben_1.add(i);
+      }
+      
+      this.turmStapel_x1      = new Stack();                                 //  x-Koordinaten von dem 1-ten Turm
+      this.turmStapel_y1      = new Stack();                                 //  y-Koordinaten von dem 1-ten Turm
+      this.turmStapel_breite1 = new Stack();                                 //  Breite der Scheiben von dem 1-ten Turm
+      this.turmStapel_x2      = new Stack();                                 //  x-Koordinaten von dem 2-ten Turm
+      this.turmStapel_y2      = new Stack();                                 //  y-Koordinaten von dem 2-ten Turm
+      this.turmStapel_breite2 = new Stack();                                 //  Breite der  Scheibe von dem 2-ten Turm
+      this.turmStapel_x3      = new Stack();                                 //  x-Koordinaten von dem 3-ten Turm
+      this.turmStapel_y3      = new Stack();                                 //  y-Koordinaten von dem 3-ten Turm
+      this.turmStapel_breite3 = new Stack();                                 //  Breite der  Scheibe von dem 3-ten Turm
+      
+      this.x_verschieben;
+      this.y_verschieben;
+
+      this.x_alt = 0; this.y_alt = 0;                                         // Koordinaten hier merken für die Berechnung von dx und dy
+      this.x_neu = 0; this.y_neu = 0,
+      this.dx = 0; this.dy = 0;                                               // Differenz für die Verschiebung von Scheiben
+
+      this.x_diff = 0, this.y_diff = 0; // Differenz zwischen dem Nullpunkt der Scheibe (obere linke Ecke) und der angeklickten Stelle auf der Scheibe
+
+      this.saeuleInDerArbeit = 0;                                             // Möglich: 1, 2, 3 
+
+      this.counter = 0;                                                       // Zähler von Schritten für die Option 'selbst versuchen'
+      
+      this.farben = new Array("rgb(100,100,0)", "rgb(0,255,255)", "rgb(255,0,255)", "rgb(125,0,125)", "rgb(255,180,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(255,0,0)", "rgb(0,0,0)" );
+     /* [9] - Scheibe ganz unten, [0] - Scheibe ganz oben */ 
+
+       /* Position von Säulen */
+       this.abstand_s = 250;              // Abstand zwischen den Säulen
+       this.x_s1 = this.abstand_s;        this.y_s1 = 500;
+       this.x_s2 = this.abstand_s * 2;    this.y_s2 = 500;
+       this.x_s3 = this.abstand_s * 3;    this.y_s3 = 500;
+
+       this.d_s = 30;                       // Durchmesser der Säule
+       this.scheibendicke = 30;
+       this.d_min = 50;
+      //========================================================================================================================
+      this.anzahlScheiben = k;
+      this.start = false;                                                                                   //   beim ersten Start false, dann true
+      this.scheibenGesamt = this.anzahlScheiben;                                                            //   für die Anzahl der Scheiben 4
+      this.saeulenMax = new Array();                                                                        //   aktueller Zustand der Besetzung der Saeulen
+      this.zustandScheibeSaeule = new Array();
+      this.zustandScheibePos = new Array();
+      
+      //Alle mögliche Zustände werden hier gespeichert:
+      this.arrayZustandScheibeSaeule = new Array(1500);
+
+      for (var i = 0; i < this.arrayZustandScheibeSaeule.length; i++) 
+      {
+        this.arrayZustandScheibeSaeule[i] = new Array(this.anzahlScheiben);
+      }
+
+      this.arrayZustandScheibePos = new Array(1500);
+
+      for (var i = 0; i < this.arrayZustandScheibePos.length; i++) 
+      {
+        this.arrayZustandScheibePos[i] = new Array(this.anzahlScheiben);
+      }      
+
+      this.count = 0;
+      
+      // Am Anfang befinden sich alle Scheiben auf der Säule 1 
+      for(let i=0;i<this.anzahlScheiben;i++)
+        {
+          this.zustandScheibeSaeule[i] = 1;
+        }
+      
+      for(let i=0;i<this.anzahlScheiben;i++)
+        {
+          this.zustandScheibePos[i] = this.anzahlScheiben - (i+1);
+        }
+      
+      this.leinwandBreite = 1600;
+      this.leinwandHoehe = 600;
+      
+      this.canvas = document.getElementById("leinwand");                                                // Referenz auf das HTML-Canvas im JavaScript DOM (Document Object Model), 
+                                                                                                        // mit der Methode getElementByID und der DOM-Id des Canvas erhalten.
+      this.context = this.canvas.getContext("2d"); 
+      
+      this.Hanoi(this.anzahlScheiben, 1, 3)
+    }
+    
+// Transportiere n Scheiben von Säule s nach Säule z
+Hanoi(n, s, z)
+{
+	if (!this.start)                                                                                     // wird nur ein Mal wahr
+	{
+		this.start = true;                                                                                 // Merker, ob die Funktion schon mal ausgeführt wurde
+		this.scheibenGesamt = n;
+      this.speicherePosition();
+		// Anzahl der Scheiben in den saeulen beim Start:
+      this.saeulenMax[0] = this.scheibenGesamt-1;                                                        // Alle Scheiben in der ersten Säule.
+		this.saeulenMax[1] = -1;                                                                           // -1 heißt keine Scheiben vorhanden
+		this.saeulenMax[2] = -1;
+	}
+
+	if (n > 1)
+	{
+		this.Hanoi(n - 1, s, 6 - s - z);
+	}  
+  
+   this.zustandScheibeSaeule[n-1] = z;                                                                  // neuer Lage der gelöschten Scheibe in der Saeule speichern
+   this.saeulenMax[z-1] = this.saeulenMax[z-1] + 1;                                                     // Anzahl verändern  
+   this.zustandScheibePos[n-1] = this.saeulenMax[z-1];                                                  //neue Lage der Scheibe-Position speichesrn
+   this.saeulenMax[s-1]= this.saeulenMax[s-1] - 1;                                                      // aus der alten Säule eine Scheibe löschen                                                                  
+   this.speicherePosition();                                                                            // aktuelle Lage der Scheiben wird für die Weitere 
+  
+	if (n > 1)
+	{
+		this.Hanoi(n - 1, 6 - s - z, z);
+	}
+}
+    
+/*---------------------------------------------------------------------------------*/
+  zeichneRechteck(posX, posY, breite, hoehe, farbeRGB) 
+  {
+      this.context.fillStyle = farbeRGB;
+      this.context.strokeStyle = "black";
+      this.context.fillRect(posX, posY, breite, hoehe);
+      this.context.strokeRect(posX, posY, breite, hoehe);                               // Methode einen 50px großen schwarzen Rahmen in der Mitte.
+  }
+
+/*---------------------------------------------------------------------------------*/
+  loescheCanvas() 
+  {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+    
+ /*---------------------------------------------------------------------------------*/  
+   tuermeZeichnen()
+   {
+      this.zeichneRechteck(50,  500, 900,  5, "rgb(0,255,0)") ;     // Boden
+      this.zeichneRechteck(this.x_s1, this.y_s1, this.d_s, -300, "rgb(210,210,210)") ; // Säule 1
+      this.zeichneRechteck(this.x_s2, this.y_s2, this.d_s, -300, "rgb(242,162,91)") ;  // Säule 2
+      this.zeichneRechteck(this.x_s3, this.y_s3, this.d_s, -300, "rgb(238,242,129)") ; // säule 3
+   }
+    
+/*---------------------------------------------------------------------------------*/
+    speicherePosition()   
+    {
+        this.count++;
+        for(let i=0;i<this.anzahlScheiben;i++)
+        {
+            this.arrayZustandScheibeSaeule[this.count][i] = this.zustandScheibeSaeule[i];
+            this.arrayZustandScheibePos[this.count][i] = this.zustandScheibePos[i];
+        }
+    }
+    
+/*---------------------------------------------------------------------------------*/
+   zeichneScheibenSchrittweise(schritt)   
+    {
+        var x;
+        var y;
+        for(let i = 0; i<this.anzahlScheiben; i++)
+        {
+            x = this.arrayZustandScheibeSaeule[schritt][i] * this.abstand_s;
+            y = 470 - (this.arrayZustandScheibePos[schritt][i]) * this.scheibendicke;
+            for(let k = 0; k < 10; k++)
+            {
+               if(i == k)
+               this.zeichneRechteck(x - (this.d_min/2) + 15,  y, this.d_min,  this.scheibendicke, this.farben[k]);
+            }
+            this.d_min = this.d_min + 25; // Die Scheibenbreite schrittweise vergrößern
+        }  
+        this.d_min = 50;
+    }
+   
+ /*------------------- Funktionen für die Option 'selbst spielen'------------------*/   
+  ScheibeNehmen(xPos, yPos)
+  {
+      let gefunden = false;
+      if(  (xPos>this.turmStapel_x1.peek())  &&  (xPos<(this.turmStapel_x1.peek() + this.turmStapel_breite1.peek())) && (yPos > this.turmStapel_y1.peek()) && ( yPos < (this.turmStapel_y1.peek() + this.d_s)) )
+      {
+         gefunden = true;
+         // Koordinaten der ausgewaehlten Scheibe von dem stack holen
+         this.x_verschieben = this.turmStapel_x1.peek();
+         this.y_verschieben = this.turmStapel_y1.peek();
+         // 
+         this.saeuleInDerArbeit = 1; 
+         // Scheibe auf der Saeule, als entfernt (-1) markieren
+         this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = -1;               // -1 => Keine Saeule
+         this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = -1;                  // -1 => Keine Position
+
+         this.x_diff = xPos - this.x_verschieben;
+         this.y_diff = yPos - this.y_verschieben;
+      } 
+      
+      if(  (xPos>this.turmStapel_x2.peek())  &&  (xPos<(this.turmStapel_x2.peek()+this.turmStapel_breite2.peek()))  &&  (yPos > this.turmStapel_y2.peek())  &&  (yPos<(this.turmStapel_y2.peek() +  this.d_s))  )
+      {
+         gefunden = true;
+         // Koordinaten der ausgewaehlten Scheibe von dem Stack holen
+         this.x_verschieben = this.turmStapel_x2.peek();
+         this.y_verschieben = this.turmStapel_y2.peek();
+         // 
+         this.saeuleInDerArbeit = 2; 
+         // Scheibe auf der Saeule, als entfernt (-1) markieren
+         this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = -1;               // -1 => Keine Saeule
+         this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = -1;                  // -1 => Keine Position
+
+         this.x_diff = xPos - this.x_verschieben;
+         this.y_diff = yPos - this.y_verschieben;
+      } 
+      
+      if(  (xPos>this.turmStapel_x3.peek())  &&  (xPos<(this.turmStapel_x3.peek()+this.turmStapel_breite3.peek()))  &&  (yPos > this.turmStapel_y3.peek())  &&  (yPos<(this.turmStapel_y3.peek()+ this.d_s))  )
+      {
+         gefunden = true;
+         // Koordinaten der ausgewaehlten Scheibe von dem stack holen
+         this.x_verschieben = this.turmStapel_x3.peek();
+         this.y_verschieben = this.turmStapel_y3.peek();
+         // 
+         this.saeuleInDerArbeit = 3; 
+         // Scheibe auf der Saeule, als entfernt (-1) markieren
+         this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = -1;               // -1 => Keine Saeule
+         this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = -1;                  // -1 => Keine Position
+
+         this.x_diff = xPos - this.x_verschieben;
+         this.y_diff = yPos - this.y_verschieben;
+      } 
+         
+      return gefunden; 
+  }
+    
+/*---------------------------------------------------------------------------------*/
+  ScheibeVerschieben(_x, _y)
+  {
+      this.x_neu = _x;
+      this.y_neu = _y;
+      this.dx = this.x_alt - this.x_neu;
+      this.dy = this.y_alt - this.y_neu;
+      this.x_alt = this.x_neu;
+      this.y_alt = this.y_neu;
+      var x = this.x_verschieben - this.dx;
+      var y = this.y_verschieben - this.dy;
+    // Je nachdem, welche Säule in der Arbeit ist, wird nach passende Breite und Farbe unterschieden
+    if(this.saeuleInDerArbeit == 1 )
+    {
+      this.zeichneRechteck(x, y, this.turmStapel_breite1.peek(),  this.scheibendicke, this.farben[this.turmStackScheiben_1.peek()]);
+    }
+    if(this.saeuleInDerArbeit == 2 )
+    {
+      this.zeichneRechteck(x, y, this.turmStapel_breite2.peek(),  this.scheibendicke, this.farben[this.turmStackScheiben_2.peek()]);
+    } 
+    if(this.saeuleInDerArbeit == 3 )
+    {
+      this.zeichneRechteck(x, y, this.turmStapel_breite3.peek(),  this.scheibendicke, this.farben[this.turmStackScheiben_3.peek()]);
+    }
+
+    this.x_verschieben = x;
+    this.y_verschieben = y;
+  }
+    
+/*---------------------------------------------------------------------------------*/
+// Überprüfen, ob genommene Scheibe über eine der drei Säulen ist; x, y sind Koordinaten des oberen linken Punktes der Scheibe. 
+// Wenn die Position vorhanden ist, wird die Funktion RegelTest aufgerufen.
+  PositionVorhanden(x, y)  
+  {
+    let vorhanden = false;
+     x = x - this.x_diff;
+     y = y - this.y_diff;
+
+    if(this.saeuleInDerArbeit == 1 )// Ursprungliche Saeule Nr.: 1                                   
+    {
+            // für zukunftige Saeule Nr.:1
+            if( (x<this.x_s1 + this.d_s && x > this.x_s1 && y + 30 >200 && y + 30 < this.y_s1) || ( (x + this.turmStapel_breite1.peek() < this.x_s1 + this.d_s)  &&  (x + this.turmStapel_breite1.peek() > this.x_s1)  &&  (y+30 > 200)  &&  (y+30 < this.y_s1) ) || ( (x < this.x_s1) && (x + this.turmStapel_breite1.peek()>this.x_s1 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s1) ) )     // für zukunftige Saeule Nr.:1
+            {
+               if(this.RegelTest(1))   //Parameter - Nummer der Saeule 1
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:2
+            else if( (x < this.x_s2 + this.d_s && x > this.x_s2 && y + 30 > 200 && y + 30 < this.y_s2) || ( (x + this.turmStapel_breite1.peek() < this.x_s2 + this.d_s)  &&  (x + this.turmStapel_breite1.peek() > this.x_s2)  &&  (y+30 > 200)  &&  (y+30 < this.y_s2) ) || ( (x < this.x_s2) && (x + this.turmStapel_breite1.peek() > this.x_s2 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s2) ) )     // für zukunftige Saeule Nr.:2  
+            {  
+               if(this.RegelTest(2))   //Parameter - Nummer der Saeule 2
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:3
+            else if( (x < this.x_s3 + this.d_s && x > this.x_s3 && y + 30 > 200 && y + 30 < this.y_s3) || ( (x+this.turmStapel_breite1.peek() < this.x_s3 + this.d_s)  &&  (x + this.turmStapel_breite1.peek() > this.x_s3)  &&  (y+30 > 200)  &&  (y+30 < this.y_s3) ) || ( (x < this.x_s3) && (x+this.turmStapel_breite1.peek()>this.x_s3 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s3) ) )     // für zukunftige Saeule Nr.:1     
+            {
+               if(this.RegelTest(3))   //Parameter - Nummer der Saeule 3
+               vorhanden = true;
+            } 
+            else // ansonsten die Scheibe in die ursprüngliche Position schreiben
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = 1;                                           // Säule merken
+               this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = this.turmStackPositionenVonScheiben_1.peek();   // Position der Scheibe in der Säule
+               this.saeuleInDerArbeit = 0;
+               vorhanden = false;
+            }  
+    }
+    else if(this.saeuleInDerArbeit == 2 ) // Ursprungliche Saeule Nr.: 2                                  
+    {
+            // für zukunftige Saeule Nr.:1
+            if( (x < this.x_s1 + this.d_s && x > this.x_s1 && y + 30 >200 && y + 30 < this.y_s1) || ( (x + this.turmStapel_breite2.peek() < this.x_s1 + this.d_s)  &&  (x + this.turmStapel_breite2.peek() > this.x_s1)  &&  (y+30 > 200)  &&  (y+30 < this.y_s1) ) || ( (x < this.x_s1) && (x+this.turmStapel_breite2.peek() > this.x_s1 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s1) ) )     // für zukunftige Saeule Nr.:1
+            {
+               if(this.RegelTest(1))   //Parameter - Nummer der Saeule 1
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:2
+            else if( (x < this.x_s2 + this.d_s && x>this.x_s2 && y + 30 >200 && y + 30 < this.y_s2) || ( (x + this.turmStapel_breite2.peek() < this.x_s2 + this.d_s)  &&  (x + this.turmStapel_breite2.peek() > this.x_s2)  &&  (y+30 > 200)  &&  (y+30 < this.y_s2) ) || ( (x < this.x_s2) && (x+this.turmStapel_breite2.peek()>this.x_s2 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s2) ) )     // für zukunftige Saeule Nr.:2  
+            {  
+               if(this.RegelTest(2))   //Parameter - Nummer der Saeule 2
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:3
+            else if( (x < this.x_s3 + this.d_s && x > this.x_s3 && y + 30 >200 && y + 30 < this.y_s3) || ( (x+this.turmStapel_breite2.peek() < this.x_s3 + this.d_s)  &&  (x + this.turmStapel_breite2.peek() > this.x_s3)  &&  (y+30 > 200)  &&  (y+30 < this.y_s3) ) || ( (x < this.x_s3) && (x + this.turmStapel_breite2.peek() > this.x_s3 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s3) ) )     // für zukunftige Saeule Nr.:1     
+            {
+               if(this.RegelTest(3))   //Parameter - Nummer der Saeule 3
+               vorhanden = true;
+            } 
+            else // ansonsten die Scheibe in die ursprüngliche Position schreiben
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = 2;                                           // Säule merken
+               this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = this.turmStackPositionenVonScheiben_2.peek();   // Position der Scheibe in der Säule
+               this.saeuleInDerArbeit = 0;
+               vorhanden = false;
+            } 
+    } 
+    else if(this.saeuleInDerArbeit == 3 )// Ursprungliche Saeule Nr.: 3                                   
+    {
+            // für zukunftige Saeule Nr.:1
+            if( (x < this.x_s1 + this.d_s && x > this.x_s1 && y + 30 >200 && y + 30 < this.y_s1) || ( (x+this.turmStapel_breite3.peek() < this.x_s1 + this.d_s)  &&  (x + this.turmStapel_breite3.peek() > this.x_s1)  &&  (y+30 > 200)  &&  (y+30 < this.y_s1) ) || ( (x < this.x_s1) && (x + this.turmStapel_breite3.peek() > this.x_s1 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s1) ) )     // für zukunftige Saeule Nr.:1
+            {
+               if(this.RegelTest(1))   //Parameter - Nummer der Saeule 1
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:2
+            else if( (x < this.x_s2 + this.d_s && x > this.x_s2 && y + 30 >200 && y + 30 < this.y_s2) || ( (x+this.turmStapel_breite3.peek() < this.x_s2 + this.d_s)  &&  (x + this.turmStapel_breite3.peek() > this.x_s2)  &&  (y + 30 > 200)  &&  (y + 30 < this.y_s2) ) || ( (x < this.x_s2) && (x + this.turmStapel_breite3.peek()>this.x_s2 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s2) ) )     // für zukunftige Saeule Nr.:2  
+            {  
+               if(this.RegelTest(2))   //Parameter - Nummer der Saeule 2
+               vorhanden = true;
+            }
+            // für zukunftige Saeule Nr.:3
+            else if( (x < this.x_s3 + this.d_s && x > this.x_s3 && y + 30 > 200 && y + 30 < this.y_s3) || ( (x+this.turmStapel_breite3.peek() < this.x_s3 + this.d_s)  &&  (x + this.turmStapel_breite3.peek() > this.x_s3)  &&  (y+30 > 200)  &&  (y+30 < this.y_s3) ) || ( (x < this.x_s3) && (x+this.turmStapel_breite3.peek()>this.x_s3 + this.d_s) && (y+30 > 200) && (y+30 < this.y_s3) ) )     // für zukunftige Saeule Nr.:3     
+            {
+               if(this.RegelTest(3))   //Parameter - Nummer der Saeule 2
+               vorhanden = true;
+            }
+            else // ansonsten die Scheibe in die ursprüngliche Position schreiben
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = 3;                                           // Säule merken
+               this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = this.turmStackPositionenVonScheiben_3.peek();   // Position der Scheibe in der Säule
+               this.saeuleInDerArbeit = 0;
+               vorhanden = false;
+            } 
+    }
+     return vorhanden;
+  } 
+    
+/*---------------------------------------------------------------------------------*/
+    /*Es wird überprüft, ob die Scheibe abgesetzt werden darf. Falls ja, wird die Scheibe aufgesetzt und 'true' zurückgeliefert*/
+    RegelTest(saeuleNr)
+    { 
+      var bestanden = false;
+      if(saeuleNr == this.saeuleInDerArbeit)  // Wenn Zielsaeule und Ursprungssaeule identisch sind
+      {  
+            if(this.saeuleInDerArbeit == 1) // Wenn Ziel- und Ursprungssaeule 1 ist
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = 1;               // 
+               this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = this.turmStackPositionenVonScheiben_1.peek();                  // 
+            }
+            if(this.saeuleInDerArbeit == 2) // Wenn Ziel- und Ursprungssaeule 2 ist
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = 2;               // 
+               this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = this.turmStackPositionenVonScheiben_2.peek();                  // 
+            }
+            if(this.saeuleInDerArbeit == 3) // Wenn Ziel- und Ursprungssaeule 3 ist
+            {
+               this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = 3;               // 
+               this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = this.turmStackPositionenVonScheiben_3.peek();                  //
+            }
+            this.saeuleInDerArbeit = 0;
+            bestanden = true;
+      }
+      else if(saeuleNr == 1)  // Zielsaeule 1 -----------------------------------------
+      {     
+            
+            if(this.saeuleInDerArbeit == 2)  // Ursprungssaeule 2
+            {
+               let tmp1 = this.turmStackScheiben_1.peek() ;                     // das oberste Element der Zielsäule
+               let tmp2 = this.turmStackScheiben_2.peek() ;                     // das oberste Element der Startsäule
+               
+               if( (this.turmStackScheiben_1.isEmpty() == true) || (tmp2 < tmp1) )
+               {
+                  this.turmStackScheiben_2.remove();
+                  this.turmStackScheiben_1.add(tmp2);
+                  if(this.turmStackPositionenVonScheiben_1.isEmpty())
+                  this.turmStackPositionenVonScheiben_1.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_1.add(this.turmStackPositionenVonScheiben_1.peek() + 1);  
+                  this.turmStackPositionenVonScheiben_2.remove();
+
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = 1;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = this.turmStackPositionenVonScheiben_1.peek();          // Position der Scheibe auf dem Turm ändern              
+                  this.turmStapel_breite1.add(this.turmStapel_breite2.peek());                                 //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite2.remove();                                                            //  Breite der Scheiben von dem 1-ten Turm nun entfernen
+                  
+                  // Koordinaten der Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] * this.abstand_s) - (this.turmStapel_breite1.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()]) * 30;
+                  
+                  this.turmStapel_x1.add( x );
+                  this.turmStapel_y1.add( y );
+                  this.turmStapel_x2.remove();
+                  this.turmStapel_y2.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               } 
+            }
+    
+            if(this.saeuleInDerArbeit == 3)  // Ursprungssaeule 3 
+            {
+               let tmp1 = this.turmStackScheiben_1.peek() ;                     // das oberste Element der Zielsäule
+               let tmp3 = this.turmStackScheiben_3.peek() ;                     // das oberste Element der Startsäule
+               
+               if((this.turmStackScheiben_1.isEmpty() == true) || (tmp3<tmp1))
+               {
+                  this.turmStackScheiben_3.remove();
+                  this.turmStackScheiben_1.add(tmp3);
+                  if(this.turmStackPositionenVonScheiben_1.isEmpty())
+                  this.turmStackPositionenVonScheiben_1.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_1.add(this.turmStackPositionenVonScheiben_1.peek()+1);  
+                  this.turmStackPositionenVonScheiben_3.remove();
+
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = 1;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = this.turmStackPositionenVonScheiben_1.peek();          // Position der Scheibe auf dem Turm ändern              
+                  this.turmStapel_breite1.add(this.turmStapel_breite3.peek());                                 //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite3.remove();                                                            //  Breite der Scheiben von dem 1-ten Turm nun entfernen
+                  
+                  // Koordinaten der Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] * this.abstand_s) - (this.turmStapel_breite1.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()]) * 30;
+                  this.turmStapel_x1.add( x );
+                  this.turmStapel_y1.add( y );
+                  this.turmStapel_x3.remove();
+                  this.turmStapel_y3.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               }
+            }
+
+        this.counter++;   
+      }
+      else if(saeuleNr == 2)  // Zielsaeule 2 -----------------------------------------
+      {
+            if(this.saeuleInDerArbeit == 1) // Ursprungssaeule 1
+            {
+               let tmp2 = this.turmStackScheiben_2.peek() ;                     // das oberste Element der Zielsaeule
+               let tmp1 = this.turmStackScheiben_1.peek() ;                     // das oberste Element der Ursprunssaeule
+               
+               if((this.turmStackScheiben_2.isEmpty() == true) || (tmp2>tmp1))
+               {
+                  this.turmStackScheiben_1.remove();
+                  this.turmStackScheiben_2.add(tmp1);
+                  if(this.turmStackPositionenVonScheiben_2.isEmpty())
+                  this.turmStackPositionenVonScheiben_2.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_2.add(this.turmStackPositionenVonScheiben_2.peek()+1);  
+                  this.turmStackPositionenVonScheiben_1.remove();
+                  
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = 2;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = this.turmStackPositionenVonScheiben_2.peek();          // Position der Scheibe auf dem Turm ändern            
+                  this.turmStapel_breite2.add(this.turmStapel_breite1.peek());                                                          //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite1.remove();                                                                                     //  Breite der Scheiben von dem 1-ten Turm nun entfernen        
+                  
+                  // Koordinaten der Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] * this.abstand_s) - (this.turmStapel_breite2.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()]) * 30;
+                  
+                  this.turmStapel_x2.add( x );
+                  this.turmStapel_y2.add( y );
+                  this.turmStapel_x1.remove();
+                  this.turmStapel_y1.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               }
+            }
+            
+            if(this.saeuleInDerArbeit == 3)                                      // Ursprungssaeule 3
+            {
+               let tmp2 = this.turmStackScheiben_2.peek() ;                     // das oberste Element der Zielsaeule
+               let tmp3 = this.turmStackScheiben_3.peek() ;                     // das oberste Element der Ursprunssaeule
+               
+               if((this.turmStackScheiben_2.isEmpty() == true) || (tmp2>tmp3))
+               {
+                  
+                  this.turmStackScheiben_3.remove();
+                  this.turmStackScheiben_2.add(tmp3);
+                  if(this.turmStackPositionenVonScheiben_2.isEmpty())
+                  this.turmStackPositionenVonScheiben_2.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_2.add(this.turmStackPositionenVonScheiben_2.peek()+1);  
+                  this.turmStackPositionenVonScheiben_3.remove();
+
+                  
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = 2;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = this.turmStackPositionenVonScheiben_2.peek();          // Position der Scheibe auf dem Turm ändern            
+                  this.turmStapel_breite2.add(this.turmStapel_breite3.peek());                                                          //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite3.remove();                                                                                     //  Breite der Scheiben von dem 1-ten Turm nun entfernen        
+                  
+                  // Koordinaten von den Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] * this.abstand_s) - (this.turmStapel_breite2.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()]) * 30;
+                  
+                  this.turmStapel_x2.add( x );
+                  this.turmStapel_y2.add( y );
+                  this.turmStapel_x3.remove();
+                  this.turmStapel_y3.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               }
+            }
+            this.counter++;   
+      }
+     else if(saeuleNr == 3)      // Zielsaeule 3 ------------------------------
+      {
+            if(this.saeuleInDerArbeit == 1)                                       // Ursprungssaeule 1 der Scheibe
+            {
+               let tmp3 = this.turmStackScheiben_3.peek() ;                     // das oberste Element der Zielsäule
+               let tmp1 = this.turmStackScheiben_1.peek() ;                     // das oberste Element der Startsäule
+               
+               if((this.turmStackScheiben_3.isEmpty() == true) || (tmp1<tmp3))
+               {
+                  this.turmStackScheiben_1.remove();
+                  this.turmStackScheiben_3.add(tmp1);
+                  if(this.turmStackPositionenVonScheiben_3.isEmpty())
+                  this.turmStackPositionenVonScheiben_3.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_3.add(this.turmStackPositionenVonScheiben_3.peek()+1);  
+                  this.turmStackPositionenVonScheiben_1.remove();
+
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = 3;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = this.turmStackPositionenVonScheiben_3.peek();          // Position der Scheibe auf dem Turm ändern              
+                  this.turmStapel_breite3.add(this.turmStapel_breite1.peek());                                 //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite1.remove();                                                            //  Breite der Scheiben von dem 1-ten Turm nun entfernen
+                  
+                  // Koordinaten von den Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] * this.abstand_s) - (this.turmStapel_breite3.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()]) * 30;
+                  
+                  this.turmStapel_x3.add( x );
+                  this.turmStapel_y3.add( y );
+                  this.turmStapel_x1.remove();
+                  this.turmStapel_y1.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               }
+            }
+            
+            if(this.saeuleInDerArbeit == 2)                                       // Ursprungssaeule 2
+            {
+               let tmp3 = this.turmStackScheiben_3.peek() ;                     // das oberste Element der Zielsäule
+               let tmp2 = this.turmStackScheiben_2.peek() ;                     // das oberste Element der Startsäule
+               
+               if((this.turmStackScheiben_3.isEmpty() == true) || (tmp2<tmp3))
+               {
+                  this.turmStackScheiben_2.remove();
+                  this.turmStackScheiben_3.add(tmp2);
+                  if(this.turmStackPositionenVonScheiben_3.isEmpty())
+                  this.turmStackPositionenVonScheiben_3.add(0);
+                  else
+                  this.turmStackPositionenVonScheiben_3.add(this.turmStackPositionenVonScheiben_3.peek()+1);  
+                  this.turmStackPositionenVonScheiben_2.remove();
+
+                  this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = 3;                                                  // Nummer der Säule für die Scheibe ändern
+                  this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = this.turmStackPositionenVonScheiben_3.peek();          // Position der Scheibe auf dem Turm ändern              
+                  this.turmStapel_breite3.add(this.turmStapel_breite2.peek());                                 //  Breite der Scheibe von dem 1-ten Turm in 2-te schreiben
+                  this.turmStapel_breite2.remove();                                                            //  Breite der Scheiben von dem 1-ten Turm nun entfernen
+                  
+                  // Koordinaten von den Scheiben aktualisieren
+                  let x = (this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] * this.abstand_s) - (this.turmStapel_breite3.peek()/2) + 15;
+                  let y = 470 - (this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()]) * 30;
+                  
+                  this.turmStapel_x3.add( x );
+                  this.turmStapel_y3.add( y );
+                  this.turmStapel_x2.remove();
+                  this.turmStapel_y2.remove();
+                  
+                  this.saeuleInDerArbeit = 0;
+                  bestanden = true;
+               }
+            }
+            this.counter++; 
+      }
+
+      if(!bestanden) // wenn der Test nicht bestanden, dann die Scheibe in die ursprüngliche Position schreiben
+      {
+         if(this.saeuleInDerArbeit == 1) // Wenn Ursprungssaeule 1 ist
+         {
+            this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_1.peek()] = 1;                                           // Säule merken
+            this.zustandScheibePosSpiel[this.turmStackScheiben_1.peek()] = this.turmStackPositionenVonScheiben_1.peek();   // Position der Scheibe in der Säule
+         }
+         if(this.saeuleInDerArbeit == 2) // Wenn Ursprungssaeule 2 ist
+         {
+            this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_2.peek()] = 2;                                           // Säule merken
+            this.zustandScheibePosSpiel[this.turmStackScheiben_2.peek()] = this.turmStackPositionenVonScheiben_2.peek();   // Position der Scheibe in der Säule
+         }
+         if(this.saeuleInDerArbeit == 3) // Wenn Ursprungssaeule 3 ist
+         {
+            this.zustandScheibeSaeuleSpiel[this.turmStackScheiben_3.peek()] = 3;                                           // Säule merken
+            this.zustandScheibePosSpiel[this.turmStackScheiben_3.peek()] = this.turmStackPositionenVonScheiben_3.peek();   // Position der Scheibe in der Säule
+         }
+         this.saeuleInDerArbeit = 0;
+      }
+      return bestanden;  
+    }
+    
+/*---------------------------------------------------------------------------------*/  
+    zeichneScheibenSpielBeimStart()                                                            // Wird nur beim start mit der option 'Spiel' ausgefüllt
+    {
+        let tmpx = new Array(11);
+        let tmpy = new Array(11);
+        let tmpbreite = new Array(11);
+        var x;
+        var y;
+        this.count++;
+        for(let i=0;i<this.anzahlScheiben;i++)
+        {
+            x = this.zustandScheibeSaeuleSpiel[i] * this.abstand_s;
+            y = 470 - (this.zustandScheibePosSpiel[i]) * this.scheibendicke;
+
+            for(let k = 0; k < 10; k++)
+            {
+               if(i == k)
+               {
+                  this.zeichneRechteck(x - (this.d_min/2) + 15,  y, this.d_min,  this.scheibendicke, this.farben[k]);
+                  tmpx[k] = (x)-(this.d_min/2)+15;
+                  tmpy[k] = y;
+                  tmpbreite[k] = this.d_min;
+               }
+            }
+            this.d_min = this.d_min + 25; // Die Scheibenbreite schrittweise vergrößern
+         }
+
+        for(var i = this.anzahlScheiben-1; i>-1; i--) // Elemente in der richtigen Reihenfolge auf dem Stack legen
+        {
+            this.turmStapel_x1.add(tmpx[i]);
+            this.turmStapel_y1.add(tmpy[i]);
+            this.turmStapel_breite1.add(tmpbreite[i]);
+         }
+         this.d_min = 50;
+    } 
+    
+/*---------------------------------------------------------------------------------*/     
+    zeichneScheibenSpiel()  // Wird nur beim start als mit der option 'Spiel' ausgefüllt 
+    {
+        var x;
+        var y;
+        for(let i = 0; i < this.anzahlScheiben; i++)
+        {
+           // if(this.zustandScheibeSaeuleSpiel[i] == -1 ) continue;
+            x = this.zustandScheibeSaeuleSpiel[i] * this.abstand_s;
+            y = 470 - (this.zustandScheibePosSpiel[i]) * this.scheibendicke;
+
+            for(let k = 9; k > -1; k--)
+            {
+               if(i == k)
+               this.zeichneRechteck(x - (this.d_min/2) + 15,  y, this.d_min,  this.scheibendicke, this.farben[k]);
+            }
+            this.d_min = this.d_min + 25; // Die Scheibenbreite schrittweise vergrößern
+        }
+        this.d_min = 50;
+    } 
+    
+/*---------------------------------------------------------------------------------*/    
+  TextausgabeFenster(ctx, text, x, y, n) 
+  {
+	    ctx.beginPath();
+	    ctx.strokeStyle="black";
+	    ctx.lineWidth="2";
+	    ctx.fillStyle="rgb(255,255,0)";
+    	 ctx.moveTo(x, y);
+     	 ctx.lineTo(x + 800, y);
+	    ctx.lineTo(x + 800, y+40*n);
+	    ctx.lineTo(x, y+40*n);
+       ctx.lineTo(x, y);
+	    ctx.fill();
+	    ctx.stroke();
+	    ctx.closePath();
+	    ctx.font = '16px Arial';
+	    ctx.textAlign = 'left';
+	    ctx.fillStyle = '#000';
+       if(n == 1)
+	    ctx.fillText(text, x+10, y+30);
+       if(n > 1)
+       {
+         for(let i = 0; i<n; i++ )
+         {
+            ctx.fillText(text[i], x+10, y+30 + i*30);
+         }
+       }
+  }
+} // class hanoi
+
+</script>
+
+<script defer>
+// ========================================================================== script.js =========================================================================================================================
+var num = 3;
+var info = 1;
+
+var H = new hanoi(num);  // Instanz anlegen (und alle Scheibenstellungen vorberechnen)
+var step = 1;            // Aktueller Stand für die Option 'Schritte anzeigen' 
+var x_Koordinate;        // x-Koordinate des Mauszeigers zum Auslesen für die Option 'selbst versuchen'
+var y_Koordinate;        // y-Koordinate des Mauszeigers zum Auslesen für die Option 'selbst versuchen' 
+
+var x_offset = 8;
+var y_offset = 129;
+var zustand = 1;
+//                1  Beim Start wird Option 'Selbst versuchen' ausgeführt.
+//                2  Zustand für Option 'Schritte anzeigen'
+
+var subzustand = -1;
+//                0 - Idle
+//                1 - Scheibe nehmen
+//                2 - Scheibe veschieben
+//                2 - Scheibe positionieren
+/*---------------------------------------------------------------------------------*/
+var n = document.getElementById("anzahl");
+
+n.addEventListener("input", function(fkt) {
+    num = n.value;
+    H = new hanoi(num);
+    Reset();
+}, false);
+
+/*---------------------------------------------------------------------------------*/
+function Weiter() 
+{
+    if((step < H.count) && (zustand == 2) )
+    {
+      step = step + 1;
+      Aktualisieren();
+    }
+}
+
+/*---------------------------------------------------------------------------------*/
+function Reset()
+{ 
+    info = 1;
+    if(zustand == 1)
+    {
+       H = new hanoi(num);
+       COUNT = 0;
+       subzustand = -1;
+       AktualisierenSpiel();
+    }
+  
+    if(zustand == 2)
+    {
+       H = new hanoi(num);
+       step = 1;
+       Aktualisieren();
+    }
+}
+
+/*---------------------------------------------------------------------------------*/
+function Zurueck()
+{
+   if( (step > 1) && (zustand == 2) )
+   {
+     step = step - 1;
+     Aktualisieren();
+   }
+}
+
+/*---------------------------------------------------------------------------------*/   
+function Aktualisieren()
+{
+  H.loescheCanvas(); 
+  H.tuermeZeichnen();
+  H.zeichneScheibenSchrittweise(step); 
+}
+
+/*---------------------------- "Programmschleife"----------------------------------*/
+function SwitchCase()
+{
+  switch(zustand)
+    {
+        /* Option - 'sebst versuchen' */
+        case 1:
+                switch(subzustand)
+                  {   
+                    /* Idle - zustand */
+                     case 0: 
+                            /* leer */
+                            break;
+
+                      /* Zustand 0, Warten auf Scheibenauswahl, Scheibe genommen ? - weiter mit dem Zustand 1 */
+                     case 1:
+                            if(H.ScheibeNehmen(x_Koordinate, y_Koordinate))
+                            {   
+                              subzustand = 2;
+                              AktualisierenSpiel();
+                              SwitchCase();
+                            }
+                            break;
+        
+                      /* Zustand 1, Scheibe verschieben */
+                      case 2: 
+                              AktualisierenSpiel();
+                              H.ScheibeVerschieben(x_Koordinate, y_Koordinate);
+                              break; 
+
+                      /* Scheibe positionieren */         
+                      case 3: 
+                      if( H.PositionVorhanden(x_Koordinate, y_Koordinate) ) 
+                      {  
+                        if(istTurmTransportiert())
+                         {
+                           info = 2;
+                           InfoBox(info);
+                         }
+                         subzustand = 0;
+                      }
+
+                      AktualisierenSpiel();
+                      break;         
+                  }
+        /* Option - 'Schritte anzeigen lassen' */
+        case 2: 
+        /* todo? */
+        break;       
+    }
+}
+
+/*---------------------------------------------------------------------------------*/
+function MausBewegungsHandlerOnMouseDown(event)
+{
+  let x_temp = event.pageX;
+  let y_temp = event.pageY; 
+  x_Koordinate = x_temp - x_offset;                                                                         // x-Koordinate des Mauszeigers auslesen
+  y_Koordinate = y_temp - y_offset;                                                                        // y-Koordinate des Mauszeigers auslesen
+  subzustand = 1;
+  SwitchCase();
+}
+
+/*----------------------- Evbent beim Bewegen der Maus ----------------------------*/
+function MausBewegungsHandlerOnMouseMove(event) 
+{
+  let x_temp = event.pageX;
+  let y_temp = event.pageY; 
+  x_Koordinate = x_temp - x_offset;                                                                         // x-Koordinate des Mauszeigers auslesen
+  y_Koordinate = y_temp - y_offset;                                                                        // y-Koordinate des Mauszeigers auslesen   
+  subzustand = 2;    
+  SwitchCase();
+}
+
+/*---------------------------------------------------------------------------------*/
+function MausBewegungsHandlerOnMouseUp(event)
+{
+  let x_temp = event.pageX;
+  let y_temp = event.pageY; 
+  x_Koordinate = x_temp - x_offset;                                                                         // x-Koordinate des Mauszeigers auslesen
+  y_Koordinate = y_temp - y_offset;
+  subzustand = 3;
+  SwitchCase();
+}
+
+/*---------------------------------------------------------------------------------*/
+function init() 
+{   
+  H.canvas.onmousedown = MausBewegungsHandlerOnMouseDown;                                             // Handler definieren beim Gedrückthalten der linken Maustaste
+  H.canvas.onmousemove = MausBewegungsHandlerOnMouseMove;                                             // Handler definieren beim Bewegen der Mause
+  H.canvas.onmouseup = MausBewegungsHandlerOnMouseUp;                                                 // Handler definieren beim Loslassen der linken Maustaste                                           
+}
+
+/*---------------------------------------------------------------------------------*/
+function AktualisierenSpiel() /* Wenn die Option - 'sebst versuchen' ausgewählt ist */
+{
+  H.loescheCanvas(); 
+  H.tuermeZeichnen();
+  if(subzustand == -1)
+    H.zeichneScheibenSpielBeimStart();
+  else
+    H.zeichneScheibenSpiel();
+  InfoBox(info);
+}
+
+/*------------ Überprüfen, ob alle Scheiben verschoben sind -----------------------*/
+function istTurmTransportiert()
+{
+  if( (H.turmStackScheiben_1.isEmpty() == true) && (H.turmStackScheiben_2.isEmpty() == true) )  // wenn beiden Säulen leer sind
+  {
+    return true;
+  }
+  return false;
+}
+
+/*-------------------------------------------Reaktion auf Ereignis bei Radio Button b1----------------------------------------*/
+function RadioButtonSchritteAnzeigenChecked()
+{
+  zustand = 2;
+  Reset();
+}
+
+/*--------------------------------------------Reaktion auf Ereignis bei Radio Button b2----------------------------------------*/
+function RadioButtonSelbstVersuchenChecked()
+{
+  zustand = 1;
+  subzustand = -1;
+  AktualisierenSpiel();
+  Reset();
+}
+
+/*----------------------------------------------------------------------------------*/
+function InfoBox(num) 
+{
+  if(num==1)
+  {
+    let text ="Sie haben aktuell " + H.counter + " Züge ausgeführt." ;
+    H.TextausgabeFenster(H.context,text, 50, 520, 1);
+  }
+  if(num==2)
+  {
+    var text2 = new Array();
+    text2[0] = "Sie haben " + H.counter + " Schritte benötigt."+ " Es ist möglich mit " + (H.count-2) + " Zügen alle Scheiben zu verschieben";
+    text2[1] = "Wenn Sie weiter versuchen möchten, klicken Sie auf 'RESET' oder verändern Sie die Anzahl der Scheiben." ;
+    H.TextausgabeFenster(H.context, text2, 50, 520, 2);
+  }
+}
+
+/*---------------------------------------------------------------------------------*/
+/* Das wird am Anfang beim Laden der Seite ausgeführt*/
+window.onload = init; 
+AktualisierenSpiel();
+Aktualisieren();
+/*---------------------------------------------------------------------------------*/
+</script>
+    <h2>App-Modus-Auswahl: </h2>
+     
+      <div class="toggle-buttons">
+        <input type="radio" id="b2" name="group-b"    onclick="RadioButtonSelbstVersuchenChecked();" />
+        <label for="b2"><b>Selbst versuchen</b></label>
+        
+	    <input type="radio" id="b1" name="group-b"    onclick="RadioButtonSchritteAnzeigenChecked();"/>
+        <label for="b1"><b>Schritte anzeigen</b></label>
+      </div>
+      <!--Auswahl per default wird Button b2 gesetzt-->
+      <script>  
+        radiobtn = document.getElementById("b2");
+        radiobtn.checked = true;
+      </script>
+    
+    <p style="text-align: right;"> <small> Hochschule Hamm-Lippstadt, Studiengang Mechatronik, 2023 </small> </p>
+    
+  </body>
+</html>
