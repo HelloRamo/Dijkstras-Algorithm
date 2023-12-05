@@ -243,7 +243,7 @@
                         <td></td>
                         <td>
                             <input type="text" id="priorityQueueA" placeholder="Priority">
-                            <button onclick="validatePriority('A')">Set</button> <!-- Button to set priority -->
+                            <button onclick="validatePriority('A')">Verify</button> <!-- Button to verify priority -->
                         </td>
                     </tr>
                     <tr>
@@ -256,7 +256,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueB" placeholder="Priority">
-                            <button onclick="validatePriority('B')">Set</button>
+                            <button onclick="validatePriority('B')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -269,7 +269,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueC" placeholder="Priority">
-                            <button onclick="validatePriority('C')">Set</button>
+                            <button onclick="validatePriority('C')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -282,7 +282,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueD" placeholder="Priority">
-                            <button onclick="validatePriority('D')">Set</button>
+                            <button onclick="validatePriority('D')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -295,7 +295,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueE" placeholder="Priority">
-                            <button onclick="validatePriority('E')">Set</button>
+                            <button onclick="validatePriority('E')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -308,7 +308,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueF" placeholder="Priority">
-                            <button onclick="validatePriority('F')">Set</button>
+                            <button onclick="validatePriority('F')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -321,7 +321,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueG" placeholder="Priority">
-                            <button onclick="validatePriority('G')">Set</button>
+                            <button onclick="validatePriority('G')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -334,7 +334,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueH" placeholder="Priority">
-                            <button onclick="validatePriority('H')">Set</button>
+                            <button onclick="validatePriority('H')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -347,7 +347,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueI" placeholder="Priority">
-                            <button onclick="validatePriority('I')">Set</button>
+                            <button onclick="validatePriority('I')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -360,7 +360,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueJ" placeholder="Priority">
-                            <button onclick="validatePriority('J')">Set</button>
+                            <button onclick="validatePriority('J')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -373,7 +373,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueK" placeholder="Priority">
-                            <button onclick="validatePriority('K')">Set</button>
+                            <button onclick="validatePriority('K')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -386,7 +386,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueL" placeholder="Priority">
-                            <button onclick="validatePriority('L')">Set</button>
+                            <button onclick="validatePriority('L')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -399,7 +399,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueM" placeholder="Priority">
-                            <button onclick="validatePriority('M')">Set</button>
+                            <button onclick="validatePriority('M')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -412,7 +412,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueN" placeholder="Priority">
-                            <button onclick="validatePriority('N')">Set</button>
+                            <button onclick="validatePriority('N')">Verify</button>
                         </td>
                     </tr>
                     <tr>
@@ -425,7 +425,7 @@
                         </td>
                         <td>
                             <input type="text" id="priorityQueueO" placeholder="Priority">
-                            <button onclick="validatePriority('O')">Set</button>
+                            <button onclick="validatePriority('O')">Verify</button>
                         </td>
                     </tr>
                 </table>
@@ -447,6 +447,28 @@
                         alert('Correct! The distance to node ' + node + ' is ' + userInput + '.');
                     } else {
                         alert('Incorrect for node ' + node + '. Try again.');
+                    }
+                }
+
+                // Updates the priority queue column in the distance table
+                function updatePriorityQueue() {
+                    const priorityQueueElements = Object.keys(userAnswers).map(node => `${node}: ${correctDistances[node]}`);
+                    const priorityQueueCells = document.querySelectorAll('[id^="priorityQueue"]');
+                    priorityQueueCells.forEach((cell, index) => {
+                        cell.value = priorityQueueElements[index];
+                    });
+                }
+
+                // Validates the priority input for a node in the priority queue
+                function validatePriority(node) {
+                    const priorityInput = document.getElementById('priorityQueue' + node).value;
+                    const priority = parseInt(priorityInput);
+
+                    if (!isNaN(priority)) {
+                        alert('Priority for node ' + node + ' is set to ' + priority + '.');
+                        updatePriorityQueue();
+                    } else {
+                        alert('Invalid priority input for node ' + node + '. Please enter a number.');
                     }
                 }
             </script>
