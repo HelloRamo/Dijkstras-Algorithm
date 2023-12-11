@@ -1,0 +1,25 @@
+
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            #graphContainer {
+                flex-grow: 1;
+            }
+
+            canvas {
+                border: 1px solid black;
+                width: 100%;
+                flex: 1;
+            }
+
+            #mainContainer {
+                display: flex;
+                justify-content: center;
+                /* Center the flex items horizontally */
+                align-items: start;
+                /* Align the flex items to the top */
+            }
+     

@@ -28,3 +28,46 @@
                     input.disabled = true;
                 }
             }
+            <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortest path Dijkstra algorithm by Ramo</title>
+</head>
+
+<body>
+    <div id="mainContainer">
+        <canvas id="graphCanvas" width="800" height="600"></canvas>
+
+        <div class="PriorityQueue">
+            <p class="placeholder"></p>
+
+        </div>
+
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            #graphContainer {
+                flex-grow: 1;
+            }
+
+            canvas {
+                border: 1px solid black;
+                width: 100%;
+                flex: 1;
+            }
+
+            #mainContainer {
+                display: flex;
+                justify-content: center;
+                /* Center the flex items horizontally */
+                align-items: start;
+                /* Align the flex items to the top */
+            }
+        </style>
