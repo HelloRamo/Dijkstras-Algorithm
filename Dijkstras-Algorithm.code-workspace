@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../gits_other"
+		}
+	],
+	"settings": {
+		"github.copilot.editor.enableAutoCompletions": false,
+		"github.copilot.chat.welcomeMessage": "never",
+		"github.copilot.editor.enableCodeActions": true,
+		"liveServer.settings.multiRootWorkspaceName": "gits_other"
+	}
+}
