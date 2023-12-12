@@ -21,5 +21,11 @@
                 /* Center the flex items horizontally */
                 align-items: start;
                 /* Align the flex items to the top */
+                resize: both;
+                overflow: auto;
             }
-     
+                  label, input, button {
+        font-size: 14px;
+        line-height: 1.5
+      }
+
