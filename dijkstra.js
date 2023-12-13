@@ -163,8 +163,8 @@ var correctDistances = result.distances;
 var userAnswers = { 'A': 0 };                                                     // creates data type dict with A set to 0
 
 
-    // Hier HTML-Elemente erstellen und Events hinzufügen
-
+// Hier HTML-Elemente erstellen und Events hinzufügen
+/*
     const inputField = document.createElement('input');
     inputField.type = 'text';
     document.body.appendChild(inputField);
@@ -201,3 +201,4 @@ var userAnswers = { 'A': 0 };                                                   
             return nodesArray[currentIndex + 1];
         }
     }
+    */

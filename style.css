@@ -1,31 +1,32 @@
+body {
+    margin: auto;
+    display: flex;
+}
 
-            body {
-                margin: 0;
-                display: flex;
-                justify-content: center;
-            }
+#graphCanvas {
+    border: 1px solid black;
+    width: 100%;
+    flex: 1;
+    justify-content: start;
+    resize: both;
+    overflow: auto;
+    justify-content: start;
+}
 
-            #graphContainer {
-                flex-grow: 1;
-            }
+#mainContainer {
+    display: flex;
+    justify-content: left;
+    /* Center the flex items horizontally */
+    /* Align the flex items to the top */
+    resize: both;
+    overflow: auto;
+}
 
-            canvas {
-                border: 1px solid black;
-                width: 100%;
-                flex: 1;
-            }
 
-            #mainContainer {
-                display: flex;
-                justify-content: center;
-                /* Center the flex items horizontally */
-                align-items: start;
-                /* Align the flex items to the top */
-                resize: both;
-                overflow: auto;
-            }
-                  label, input, button {
-        font-size: 14px;
-        line-height: 1.5
-      }
-
+#pageHeader {
+    text-align: center;
+    position: right;
+    top: 0%;
+    right: 25%;
+    text-align: center;
+}
