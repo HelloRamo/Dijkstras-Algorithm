@@ -1,11 +1,11 @@
 
-
+//== variables and constants  ========================================================================================================
 
 let canvas = document.getElementById('graphCanvas');
 let ctx = canvas.getContext('2d');
 let outputDiv = document.getElementById('output');
 
-const nodes = {
+var nodes = {
     A: { x: 128, y: 255 },
     B: { x: 212, y: 85 },
     C: { x: 42, y: 127 },
@@ -56,8 +56,6 @@ const edges = [
     { from: 'M', to: 'L' },
     { from: 'N', to: 'O' },
     { from: 'O', to: 'J' },
-
-
 ];
 
 
@@ -88,10 +86,13 @@ for (let node in nodes) {
     ctx.font = '20px Arial';
     ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
 }
-const queue = document.querySelector(".queue");
+
+// const queue = document.querySelector(".queue");
+
+//== classes and functions  ========================================================================================================
 
 class PriorityQueue {
-    constructor() {                                                          // constructor initializes an empty queue
+    constructor() {
         this.queue = [];
     }
 
@@ -101,7 +102,7 @@ class PriorityQueue {
     }
 
     dequeue() {                                                            // removes the first element (highest priority) from array
-        if (this.isEmpty()) {                                              // checks if queue is empty
+        if (this.isEmpty()) {
             return "Queue is empty";
         }
         return this.queue.shift().element;                                // removes first element
@@ -120,7 +121,7 @@ class PriorityQueue {
             console.log(item.element);
         });
     }
-}
+} _
 
 function dijkstra(start) {
     const distances = {};                                               // shortest dist from start to each node
@@ -139,7 +140,7 @@ function dijkstra(start) {
     while (!priorityQueue.isEmpty()) {                                  // sets condition while loop true if not empty! -!
         let current = priorityQueue.dequeue();                          // dequeues highest pq node
 
-        // iterates over edges and filters only conencted nodes to current node
+        // iterates over edges and filters only connected nodes to current node
         edges.filter(edge => edge.from === current || edge.to === current).forEach(edge => {
             let otherNode = edge.from === current ? edge.to : edge.from;                                // checks "from" "to" edges of nodes
             let weight = edge.weight; // retreives weight curr edge
@@ -152,53 +153,33 @@ function dijkstra(start) {
         });
     }
 
-    return { distances, prev };                                                                        // prev has no further function in programm -> const prev = new map() ...
+    return { distances };     // ?return prev?                                                                    // prev -> const prev = new map() ...
 }
 
-// starts algorithm from start node A
-const startNode = 'A';
-const result = dijkstra('A');
-const dijkstraResult = dijkstra(startNode);                                   // ?stores the result of the dijkstra algorithm in a variable?
-var correctDistances = result.distances;
-var userAnswers = { 'A': 0 };                                                     // creates data type dict with A set to 0
+//== event handler  ========================================================================================================
 
 
-// Hier HTML-Elemente erstellen und Events hinzufügen
-/*
-    const inputField = document.createElement('input');
-    inputField.type = 'text';
-    document.body.appendChild(inputField);
+// Ersetzen Sie diese Werte durch die tatsächlichen kürzesten Distanzen in Ihrem Graphen
+// Fügen Sie hier weitere Knoten hinzu, wenn nötig
 
-    const resultWindow = document.createElement('div');
-    document.body.appendChild(resultWindow);
 
-    let currentNode = 'A';
+function validateInput(node) {
+    const startNode = 'A';
+    const result = dijkstra('A');
+    const dijkstraResult = dijkstra(startNode);
+    var correctDistances = result.distances;
+    var userAnswers = { 'A': 0 };
+    var userInput = document.getElementById('distanceTo' + node).value;
 
-    inputField.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            const inputValue = inputField.value.trim().toUpperCase();
-            const shortestDistance = dijkstra(currentNode);
-
-            if (inputValue === currentNode) {
-                resultWindow.innerText = 'Richtig!';
-                currentNode = getNextNode(); // Funktion implementieren, um den nächsten Knoten zu erhalten
-                inputField.value = '';
-            } else {
-                resultWindow.innerText = 'Falsch. Versuche es erneut.';
-            }
-        }
-    });
-
-    function getNextNode() {
-        const nodesArray = Object.keys(nodes); // Get an array of all nodes
-        const currentIndex = nodesArray.indexOf(currentNode); // Get the index of the current node
-
-        // If the current node is the last node in the array, return the first node
-        if (currentIndex === nodesArray.length - 1) {
-            return nodesArray[0];
-        } else {
-            // Otherwise, return the next node in the array
-            return nodesArray[currentIndex + 1];
-        }
+    if (correctDistances[node] == userInput) {
+        userAnswers[node] = userInput;
+        alert('Richtig! Die kürzeste Distanz zum Knoten ' + node + ' beträgt ' + userInput + '.');
     }
-    */
+    else {
+        alert('Falsch für Knoten ' + node + '. Versuchen Sie es erneut.');
+    }
+}
+
+//== programm execution  ========================================================================================================
+
+

@@ -1,0 +1,42 @@
+body {
+    margin: 0;
+    justify-content: start;
+}
+
+#mainContainer {
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    resize: both;
+    overflow: auto;
+
+}
+
+#graphCanvas {
+    border: 1px solid black;
+    width: 680px;
+    height: 444px;
+
+    overflow: auto;
+
+}
+
+#distanceTable,
+#distanceTable th,
+#distanceTable td {
+    position: static;
+    margin-bottom: 5px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 3px;
+
+
+}
+
+input[placeholder="Distance"] {
+    width: 55px;
+}
+
+input[placeholder="Priority Queue"] {
+    width: 240px;
+}
