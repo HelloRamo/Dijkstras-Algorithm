@@ -1,32 +1,30 @@
+function validateInput() {
 
-class PriorityQueue {
-    constructor() {
-        this.queue = [];
-    }
+    const startNode = 'A';
+    const result = dijkstra('A');
+    const dijkstraResult = dijkstra(startNode);
+    var correctDistances = result.distances;
+    var userAnswers = { 'A': 0 };
 
-    enqueue(element, priority) {                                            // adds element to queue with a given priority and sorts them
-        this.queue.push({ element, priority });
-        this.sort();
-    }
+    // Iterate through each node from A to E
+    for (let i = 1; i < 6; i++) {
+        // Convert the number to a letter (65 is the ASCII value for 'A')
+        let node = String.fromCharCode(65 + i);
 
-    dequeue() {                                                            // removes the first element (highest priority) from array
-        if (this.isEmpty()) {
-            return "Queue is empty";
-        }
-        return this.queue.shift().element;                                // removes first element
-    }
+        let userInput;
+        do {
+            // Ask the user for their input
+            userInput = prompt('Bitte geben Sie die kürzeste Distanz zum Knoten ' + node + ' ein:');
 
-    isEmpty() {
-        return this.queue.length === 0;
-    }
-
-    sort() {                                                            // output difference of priority and sort -> if negative, a has a higher priority than b
-        this.queue.sort((a, b) => a.priority - b.priority);
-    }
-
-    printQueue() {                                                      // prints the elements in the queue
-        this.queue.forEach(item => {
-            console.log(item.element);
-        });
+            if (correctDistances[node] == userInput) {
+                userAnswers[node] = userInput;
+                alert('Richtig! Die kürzeste Distanz zum Knoten ' + node + ' beträgt ' + userInput + '.');
+                document.getElementById('distanceTo' + node).value = userInput;
+                break;
+            }
+            else {
+                alert('Falsch für Knoten ' + node + '. Versuchen Sie es erneut.');
+            }
+        } while (true);
     }
 }

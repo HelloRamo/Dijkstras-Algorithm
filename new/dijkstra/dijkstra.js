@@ -1,9 +1,9 @@
 
 //== variables and constants  ========================================================================================================
 
-let canvas = document.getElementById('graphCanvas');
-let ctx = canvas.getContext('2d');
-let outputDiv = document.getElementById('output');
+canvas = document.getElementById('graphCanvas');
+ctx = canvas.getContext('2d');
+outputDiv = document.getElementById('output');
 
 const nodes = {
     A: { x: 128, y: 255 },
@@ -93,9 +93,6 @@ for (let node in nodes) {
     ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
 }
 
-
-// const queue = document.querySelector(".queue");
-
 //== classes and functions  ========================================================================================================
 
 class PriorityQueue {
@@ -110,20 +107,20 @@ class PriorityQueue {
 
     dequeue() {                                                            // removes the first element (highest priority) from array
         if (this.isEmpty()) {
-            return "Queue is empty";
+            return;
         }
-        return this.queue.shift().element;                                // removes first element
+        return this.queue.shift().element;
     }
 
     isEmpty() {
         return this.queue.length === 0;
     }
 
-    sort() {                                                            // output difference of priority and sort -> if negative, a has a higher priority than b
+    sort() {
         this.queue.sort((a, b) => a.priority - b.priority);
     }
 
-    printQueue() {                                                      // prints the elements in the queue
+    printQueue() {                                                      // stores the elements in the queue
         this.queue.forEach(item => {
             console.log(item.element);
         });
@@ -167,21 +164,16 @@ function dijkstra(start) {
 //== event handler  ========================================================================================================
 
 function validateInput() {
-
-    const startNode = 'A';
     const result = dijkstra('A');
-    const dijkstraResult = dijkstra(startNode);
-    var correctDistances = result.distances;
-    var userAnswers = { 'A': 0 };
+    const correctDistances = result.distances;
+    const userAnswers = { 'A': 0 };
 
-    // Iterate through each node from A to E
+    // Iterate through each node from A to F
     for (let i = 1; i < 6; i++) {
-        // Convert the number to a letter (65 is the ASCII value for 'A')
-        let node = String.fromCharCode(65 + i);
-
+        let node = String.fromCharCode(65 + i);  // 65 = A in ASCII code 
         let userInput;
+
         do {
-            // Ask the user for their input
             userInput = prompt('Bitte geben Sie die kürzeste Distanz zum Knoten ' + node + ' ein:');
 
             if (correctDistances[node] == userInput) {
@@ -193,64 +185,19 @@ function validateInput() {
             else {
                 alert('Falsch für Knoten ' + node + '. Versuchen Sie es erneut.');
             }
+            if (userInput === null) {
+                break;
+            }
         } while (true);
     }
-}
+};
 
-function resetGame() {
-    let canvas = document.getElementById('graphCanvas');
-    let ctx = canvas.getContext('2d');
-
-    edges = [originalEdges];
-    nodes = { originalNodes };
-
-    // new copy of original edges and nodes. independent of old values
-    let originalEdges = JSON.parse(JSON.stringify(edges));
-    let originalNodes = JSON.parse(JSON.stringify(nodes));
-
-
-    edges.forEach(edge => {
-        edge.weight = Math.floor(Math.random() * 14 + 1);
+document.addEventListener('DOMContentLoaded', function () {
+    let resetButton = document.getElementById('reset');
+    resetButton.addEventListener('click', function () {
+        location.reload();
     });
-
-    // Redraw the edges and nodes
-    redrawEdgesAndNodes();
-
-}
-
-
-function redrawEdgesAndNodes() {
-    // Clear the current state of the Canvas
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Redraw the edges
-    edges.forEach(edge => {
-        ctx.beginPath();
-        ctx.moveTo(nodes[edge.from].x, nodes[edge.from].y);
-        ctx.lineTo(nodes[edge.to].x, nodes[edge.to].y);
-        ctx.stroke();
-        let midX = (nodes[edge.from].x + nodes[edge.to].x) / 2;
-        let midY = (nodes[edge.from].y + nodes[edge.to].y) / 2;
-        ctx.font = '20px Arial';
-        ctx.fillText(edge.weight, midX, midY);
-    });
-
-    // Redraw the nodes
-    for (let node in nodes) {
-        ctx.beginPath();
-        ctx.arc(nodes[node].x, nodes[node].y, 20, 0, 2 * Math.PI);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.strokeStyle = 'black';
-        ctx.stroke();
-        ctx.fillStyle = 'black';
-        ctx.font = '20px Arial';
-        ctx.fillText(node, nodes[node].x - 10, nodes[node].y + 7);
-    }
-}
-let pq = new PriorityQueue();
-dijkstra(pq, 'A');
+});
 //== programm execution  ========================================================================================================
 
 

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html lang="de">
+  
+  
+        <head>
+
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+                <style>
+                    h3 
+                    {
+                        font-size: 1.8em;
+                        background-color: #F2E8CA;
+                        margin: 50px;
+                        padding: 10px; 
+                    }
+
+
+
+                    /* Eigenschaften für Eingabefelder */
+                    input 
+                    {
+                        height: 20px;
+                        width: 50px;
+                        border: 2px solid black;
+                    }
+
+
+
+                    /*Eigenschaften für Buttons*/
+                    button 
+                    {
+                        height: 40px;
+                        width: 160px;
+                        border: 2px solid black;
+                    }
+
+                </style>
+
+
+
+                <!-- 
+                  This is an HTML comment
+                  You can write text in a comment and the content won't be visible in the page
+                -->
+
+                <title> Schleifen, Zufallszahlen </title>
+
+
+
+          
+        </head>
+
+
+
+        <body>
+
+
+
+            <script>
+
+console.log("Hello 🌎");
+
+
+
+var textPosX = 20;
+var textPosY = 30;
+
+var min = 0;
+var max = 1000;
+
+// Variablen für die Aufgabestellung:
+var untereGrenze;
+var obereGrenze;
+var arrayGroesse;
+var stellenVon;
+var stellenBis;
+var schrittweite;
+
+// Variablen für Eingaben:
+
+/*
+0 - Größe des Arrays
+1 - 
+2 - 
+3 - 
+4 - 
+5 - 
+*/
+var eingaben = new Array(6);
+eingaben = {};
+
+var text1 = new Array(4);
+var text2 = new Array(4);
+var text3 = new Array(4);
+
+/* 1.Text festlegen */
+text1[0] = " Richtig ! ";
+text1[1] = "";
+text1[2] = "";
+
+/* 2.Text festlegen */
+text2[0] = " Nicht ganz richtig !";
+text2[1] = " ";
+text2[2] = "";
+
+/* 3.Text festlegen */
+text3[0] = "                              ";
+text3[1] = "                              ";
+text3[2] = "                              ";
+
+//------------------------------------------------------------------------------------
+function WerteGenerieren()
+{
+  
+  // Bereich der Zufallszahlen generieren:
+  untereGrenze = Math.round(Math.random() * (max-min+1)) + min;
+  obereGrenze = Math.round(Math.random() * (max - untereGrenze + 1)) + untereGrenze;
+  
+  console.log("untere Grenze: " + untereGrenze);
+  console.log("obere Grenze: " + obereGrenze);
+  
+  // Schrittweite generieren:
+  schrittweite = Math.round(Math.random() * (10 - 1 + 1)) + 1;
+  console.log("Schrittweite: " + schrittweite);
+  
+  // An den Stellen:
+  stellenVon = Math.round(Math.random() * (max - min + 1)) + min;
+  stellenBis = stellenVon + ( schrittweite * 20 );
+  
+  console.log("Stellen von: " + stellenVon);
+  console.log("Stellen bis: " + stellenBis);
+  
+  // Größe des Arrays:
+  if(stellenBis <= 100)
+    arrayGroesse = 100;
+  else if(stellenBis <= 300)
+    arrayGroesse = 300;
+  else if(stellenBis <= 500)
+    arrayGroesse = 500;
+  else if(stellenBis <= 700)
+    arrayGroesse = 700;
+  else if(stellenBis <= 1000)
+    arrayGroesse = 1000;
+  else if(stellenBis <= 1300)
+    arrayGroesse = 1300;
+  
+  console.log("Arraygröße: " + arrayGroesse);
+  
+  
+}
+
+//------------------------------------------------------------------------------------
+function TextfelderAuslesen()
+{
+   eingaben[0] = document.querySelector("#var1").value;
+   eingaben[1] = document.querySelector("#var2").value;
+   eingaben[2] = document.querySelector("#var3").value;
+   eingaben[3] = document.querySelector("#var4").value;
+   eingaben[4] = document.querySelector("#var5").value;
+   eingaben[5] = document.querySelector("#var6").value;
+}
+
+//------------------------------------------------------------------------------------
+function Check()  //ToDo ...
+{
+  var richtig = true;
+   
+   TextfelderAuslesen()
+ 
+   for(let i = 0;i<6;i++)
+   console.log(i+". Ausgelesen: " + eingaben[i]);
+  
+   if(eingaben[0] != arrayGroesse) // Arraygröße prüfen
+    {
+       console.log("Arraygröße ist falsch!");
+       document.querySelector("#var1").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+    
+   if(eingaben[1] != stellenVon)  // Startindex in der for-Schleife prüfen
+    {
+       console.log("i = xxx in der for-Schleife ist falsch!");
+       document.querySelector("#var2").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+  
+    if(eingaben[2] != (stellenBis+1))  // i < xxx in der for-Schleife prüfen
+    {
+       console.log("i < xxx in der for-Schleife ist falsch!");
+       document.querySelector("#var3").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+  
+    if(eingaben[3] != schrittweite)  // Schrittweite in der for-Schleife prüfen
+    {
+       console.log("Schrittweite in der for-Schleife ist falsch!");
+       document.querySelector("#var4").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+  
+    if(eingaben[4] != (obereGrenze - untereGrenze +1))  // 1. Variable bei der Berechnung der Zufalszahlen
+    {
+       console.log("rand() % xxx");
+       document.querySelector("#var5").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+  
+    if(eingaben[5] != (untereGrenze))  // 1. Variable bei der Berechnung der Zufalszahlen
+    {
+       console.log("rand() % xxx");
+       document.querySelector("#var6").value = "";
+       richtig = false;
+       Ausgabe(2);
+    }
+  
+    if(richtig == true)
+    {
+        Ausgabe(1);
+    }
+  
+  // TextfelderLeeren();
+  // Ausgabe();
+}
+
+//-------------------------------------------------------------------------------------
+/* Alle Werte Löschen */
+function TextfelderLeeren()
+{
+   document.querySelector("#var1").value = "";
+   document.querySelector("#var2").value = "";
+   document.querySelector("#var3").value = "";
+   document.querySelector("#var4").value = "";
+   document.querySelector("#var5").value = "";
+   document.querySelector("#var6").value = "";
+   
+}
+
+
+//--------------------------------------------------------------------------------------
+/* Den Text zeilenweise ausgeben. Als Parameter kommt ein Array, in dem eine Zeile des Textes pro Element des Arrays gespeichert wird */
+/* Canvasgröße 1600x100,  absoluter Nullpunkt liegt in x =  , y =  */
+function Ausgabe(nr)
+{
+         // ---------------- Referenz auf das HTML-Canvas im JavaScript DOM (Document Object Model), mit der Methode getElementByID und der DOM-Id des Canvas erhalten:
+        var canvas = document.getElementById("leinwand");   
+        var context = canvas.getContext("2d"); 
+        var n = 3;
+
+      
+        context.fillStyle = "yellow";
+        context.fillRect(textPosX+50, textPosY-30, 500, 100);
+        context.lineWidth = 2;                                                                  // Liniendicke
+        context.strokeStyle ="black";                                                         // Rahmenfarbe
+        context.font = ' 25px TNR';                                                             // Schrifteigenschaften
+        context.fillStyle = "black";                                                          // Schriftfarbe
+        context.strokeRect(textPosX+50, textPosY-30, 500, 100)                                  // Rahmen Zeichnen abhängig von der Zeilenanzahl
+     
+       if(nr==1) 
+        {
+            for(let i = 0; i<n; i++)                                                                // Text ausgeben
+            {
+                  context.fillText(text1[i], textPosX+70, textPosY + (i*30)); 
+            }
+        }
+  
+  
+        if(nr==2) 
+        {
+            for(let i = 0; i<n; i++)                                                                // Text ausgeben
+            {
+                  context.fillText(text2[i], textPosX+70, textPosY + (i*30)); 
+            }
+        }
+          
+}
+
+
+
+//----------------------------------------------------------------------------------------
+
+function NochMal()
+{
+  TextfelderLeeren();
+  location.reload();
+}
+
+
+WerteGenerieren();
+
+
+
+            </script>      
+
+
+
+             
+
+                <!-- This is the start of content for our page -->
+                <h1> Schleifen, Zufallszahlen </h1>
+                <h2> Gegeben ist folgendes C++ - Programmfragment:</h2>
+                
+                
+                
+                  <h3 style="font-family:'Courier New';">
+                                
+                        ...
+                        <br/> 
+                        <span style="color: #29992D"> /* Zufallszahlengenerator mit aktueller Uhrzeit initialisieren */ </span>
+                        <br/>     
+                         srand ( <span style="color: #1843EC">  unsigned int  </span> (  time(<span style="color: #2196F3"> NULL  </span>) ) );
+                        <br/>          
+                        ...
+                        <br/>
+                        <span style="color: #29992D">    /* Array a anlegen */ </span> 
+                        <br/>
+                        <span style="color: #1843EC">  int  </span> a[<input type="text" name="var1" id="var1" value="" size="6">];        
+                        <br/>
+                        <span style="color: #1843EC"> for  </span> (<span style="color: #1843EC"> int  </span> i = <input type="text" name="var2" id="var2" value="" size="6">;  i &lt; <input type="text" name="var3" id="var3" value=" " size="6">;  i = i + <input type="text" name="var4" id="var4" value="" size="6">)
+                        <br/>
+                        {
+                            <blockquote><span style="color: #29992D"> /* Array mit zufälligen Integer-Werten initialisieren. */ </span>
+                            <br/> 
+                            a[i] = rand()  % <input type="text" name="var5" id="var5" value="" size="6"> + <input type="text" name="var6" id="var6" value="" size="6">; </blockquote>
+                        } 
+
+                       <br/>          
+                        ...
+
+
+                 </h3>
+          
+          
+                <canvas id="leinwand" width="1600" height="130"></canvas><br />
+          
+          
+                <h2>
+                  Das Array <span style="font-family:'Courier New'; black; font-size: 1.2em; ">a</span> der Größe <script type="text/javascript" >document.write(arrayGroesse)</script> soll an den Stellen von <script type="text/javascript" >document.write(stellenVon)</script> bis <script type="text/javascript" >document.write(stellenBis)</script> mit Schrittweite <script type="text/javascript" >document.write(schrittweite)</script>  
+                mit Werten aus dem Bereich von <script type="text/javascript" >document.write(untereGrenze)</script> bis <script type="text/javascript" >document.write(obereGrenze)</script> beschrieben werden.
+                </h2>
+
+                <h2> Bitte ergänzen Sie fehlende Elemente und nachdem Sie alle Werte eingegeben haben, betätigen Sie den Button "Eingabe überprüfen" 
+                <label for="button1"><b>  </b></label>
+                <button onclick="Check()" id="button1" type="submit">   Eingabe Überprüfen   </button>          
+                </h2>
+        
+          
+                <h2> Falls sie noch Mal versuchen möchten, betätigen Sie den Button "Noch mal versuchen" 
+                <label for="button1"><b>  </b></label>
+                <button onclick="NochMal()" id="button2" type="submit">  Noch mal versuchen   </button>          
+                </h2>
+  
+  
+               <p style="text-align: right;"> <small> Hochschule Hamm-Lippstadt, Studiengang Mechatronik, 2022 </small> </p>
+  
+  </body>
+  
+  
+</html>

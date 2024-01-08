@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+     <meta charset="utf-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <title> Zeigerdiagrammen </title>
+    <style>
+                .selektor1 {
+        font-family: Arial;
+        }
+
+
+
+        button {
+            height: 40px;
+            width: 80px;
+            border: 2px solid #001055;
+        }
+
+        select {
+            height: 40px;
+            width: 200px;
+            border: 4px solid black;
+        }
+
+        input {
+            height: 40px;
+            width: 100px;
+            border: 4px solid black;
+        }
+    </style>
+
+  </head>
+  
+  <body>
+    <h2 class="selektor1"> Zeigerdiagramme </h2>  
+    <h4 class="selektor1"> Gegeben ist das folgende C++ Programm:</h4>
+    <canvas id="leinwand" width="1600" height="700"></canvas><br />
+
+    
+    <h4 class="selektor1"> Stellen Sie für jede der Programmzeilen die Belegung der Variablen und ihrer Zusammenhänge graphisch dar.
+     Verändern Sie Pfeile, indem Sie zuerst auf die Zeigervariable klicken und dann auf die Variable auf die der Zeiger zeigt.</h4> 
+    
+    
+    <!-- =================================== Eingabefeld ====================================== -->
+
+     
+     <!-- Zeilenumbruvh -->
+    
+     
+    <form>
+      <b>
+      <label for="w" class="selektor1"> Klicken Sie zuerst auf die zu verändernde Variable im Diagramm und geben Sie hier den neuen Wert der Variable ein 
+         und schließlich bestätigen Sie Ihre Eingabe mit der ENTER(Eingabe)-Taste:                   
+      <input type="text" id="w" name="w">
+      </label>
+     </b>
+    </form> 
+    
+    
+    <!-- =================================== Button ====================================== -->
+
+
+   
+   
+    <form>
+      <b>
+        <label>
+        <!--   <label for="btn1" class="button"> Wenn alle Werte eingegeben wurden, bitte hier einmal bestätigen:-->
+        <button style="display:none" onclick="eingabe(); return false;" id="btn1" name="btn1"> Prüfen </button>   
+        <!-- ...; return false;.. vermeidet das Neuladen der Seite-->
+        <!-- mittels style="display:none" wird der Button unsichtbar gemacht, da von dem Button nur die Funktionalität benutzt wird (bei Eingabe des Wertes mit Enter Taste) -->
+        </label>
+      </b>
+    </form> 
+    
+    
+    <!-- =================================== Auswahlfeld ====================================== -->
+    
+     
+      <form> 
+        <b>
+            <label class="selektor1">Hier stehen Ihnen Aufgaben zur Auswahl bereit:
+            <select id="mySelect" name="top10" size="1">
+            <option value="1" selected> Aufgabe 1 </option>
+            <option value="2"> Aufgabe 2  </option>
+            <option value="3"> Aufgabe 3  </option>
+            <option value="4"> Aufgabe 4  </option>
+            <option value="5"> Aufgabe 5  </option>
+            <option value="6"> Aufgabe 6  </option>
+
+           </select>
+           </label>
+        </b>
+    </form>
+    
+
+    <script>
+    // =========================================================================== SpielT =========================================================================
+
+    // Klasse SpielT
+
+class SpielT
+  {
+    // =============================================================== Konstruktor der Klasse =========================================================================
+    // Eingabeparameter: 1. Array mit Quellcode, 2. Anzahl der Zeilen im Quellkode, 3. Array mit allen Zuständen 4. Gesamte Anzahl der Zustände
+    // 5. Händler-beim Clicken
+    //
+    // Startzeile im Quellcode (erste Zeile ist 0) ...ToDo 
+    //           1.      2.       3.           4.                    5.          
+    constructor(text, zeilen, zustaende, zustaendeAnzahl, MausBewegungsHandlerOnClick)
+    {
+      
+
+      
+      //this.zeileAktuell = 0;                                                                                         // aktuelle Zeile mit Elementen
+      //this.quellcodezeileAktuell = zustaendeAnzahl- 3;                                                             // Anfangszeile im Quellcode 
+      this.startX = 100;                    // Tatsächlich 100                                                       // x-Koord. des ersten Elements
+      this.dX = 0;        // Unterschied zwischen dem Canvas und Mauszeigerkoordinaten
+      this.startY = 450;                    // Tatsächlich 550                                                       // y-Koord. des ersten Elements
+      this.dY = 40;       // Unterschied zwischen dem Canvas und Mauszeigerkoordinaten
+      this.aktuellesElementEingabe = 0;
+      this.itmp = 0;                      // Wird benötigt um die Position des zuerst angeklickten Elements zu merken (beim Absetzen des Zeiger-Pfeils)
+      this.aktuelleZeile = 0;             // Die Zeile auf dem Bildschirm, wird im Speilverlauf inkrementiert
+      //-----Zustände elemtenweise kopieren----------
+      
+      this.elementenAnzahl = zustaende[0].length;                                                                   // Anzahl von Elementen (fest)
+      this.merkmalenAnzahl = 7;                                                                                     // Eigenschaften eines elements immer 7
+      this.iMax = zustaendeAnzahl;                                                                                  // Anzahl von Zuständen
+      this.jMax = this.elementenAnzahl;                                                                                         
+      
+      this.zustaende = new Array(this.iMax);
+      
+      for (let i=0; i<this.iMax; i++)                                                                               // Dreidimensionales Array anlegen
+       {                                                                                                            // Array für alle Zustände anlegen
+         this.zustaende[i] = new Array;
+            for (let j=0; j<this.jMax; j++)                                                                         // Arrays für alle Elemente anhängen                                                                        
+             {
+               this.zustaende[i][j] = new Array(this.merkmalenAnzahl);
+             }
+       }
+       
+    
+      for (let i=0; i<this.iMax; i++)                                                                              // Dreidimensionales Array kopieren
+       {     
+            for (let j=0; j<this.jMax; j++)                                                                          
+            {         
+                for (let k=0; k<this.merkmalenAnzahl; k++)                                                                          
+                {
+                  this.zustaende[i][j][k] = zustaende[i][j][k];        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Achtung!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                }
+            }  
+       }
+      
+           
+      // Variable für den veränderlichen Eigabezustand erzeugen
+      // Anzahl der Elementen:
+      this.anzElem = zustaende[0].length;
+      
+      this.tempEingabe = new Array();
+      this.tempNext = new Array();
+      
+      
+      for (let i=0; i<this.anzElem; i++)                                                                         
+       {
+          this.tempEingabe[i] = new Array;
+          this.tempNext[i] = new Array;
+       }
+      
+      for(let i =0; i<this.anzElem; i++)                                                                            // Am Anfang den Ausgangszustand speichern
+        {
+          for(let j=0; j<this.merkmalenAnzahl; j++)
+            {
+              this.tempEingabe[i][j] = this.zustaende[0][i][j];  
+              this.tempNext[i][j] = this.zustaende[0][i][j];                         // Hier werden aktuelle Werte eingetragen und danach mit tempEingabe verglichen
+            }                                                         
+        }
+      
+      //console.log(this.tempEingabe);
+      
+      //--Variablen für ZeichneQuellcode() -----------
+       this.n = zeilen;
+       this.quelltext = new Array;                                                                             // Array anlegen
+       for(let i = 0; i < this.n; i++)
+        {
+            this.quelltext[i]= text[i];                                                                        // Quelltext elementenweise kopieren
+        }
+      
+        // Quelltextposition:
+        this.textPosX = 100;
+        this.textPosY = 100;
+      
+       //--ZeichneRechteck( ... ) --------------------
+      
+        this.breite = 50;             // Breite und Höhe eines Elements
+        this.hoehe = 50;              //
+        this.leinwandBreite = 1600;   // wird noch nicht benutzt
+        this.leinwandHoehe = 700;     // wird noch nicht benutzt  
+      
+      // ---------------------------------------------
+      
+      
+        // Referenz auf das HTML-Canvas im JavaScript DOM (Document Object Model) 
+        // mit der Methode getElementByID und der DOM-Id des Canvas erhalten.
+        this.canvas = document.getElementById("leinwand");                         
+        this.context = this.canvas.getContext("2d");  
+      
+        this.canvas.onclick = MausBewegungsHandlerOnClick; 
+        //this.canvas.onmousemove = MausBewegungsHandlerOnMouseMove; 
+    }
+    
+    
+    // ============================================================== Funktionen der Klasse ===========================================================================
+    ZeichneZeile()
+    {
+                  
+             for(let i = 0; i<this.anzElem; i++)
+               {
+                  //Variablen Zeichnen
+                 this.ZeichneRechteck(  this.startX + (this.tempEingabe[i][5] * 100 ), this.startY + 100,  this.tempEingabe[i][3] );
+
+                 // Pfeile zeichnen
+                  if(this.tempEingabe[i][1] == 0)         // Kurzes Pfeil
+                    {
+                      this.ZeichnePfeilKurz(this.startX + (this.tempEingabe[i][5] * 100 ) + this.breite/2, this.startY + ( 100 )+this.hoehe/2);
+                      this.KreisZeichnen(this.startX + (this.tempEingabe[i][5] * 100 ) + this.breite/2, this.startY + ( 100 )+this.hoehe/2);
+                    }
+                  else if(this.tempEingabe[i][1] == 1)    // Langes Pfeil
+                    {
+                      if(this.tempEingabe[i][5] < this.tempEingabe[i][2])
+                        {
+                          this.ZeichnePfeil(this.startX + (this.tempEingabe[i][5] * 100 )+this.breite/2, this.startY + ( 100 )+ this.hoehe/2 + this.tempEingabe[i][5], this.startX + (this.tempEingabe[i][2] * 100 )+this.breite/4, this.startY + ( 100 ), this.tempEingabe[i][5]*3); 
+                          this.KreisZeichnen(this.startX + (this.tempEingabe[i][5] * 100 ) + this.breite/2, this.startY + ( 100 )+this.hoehe/2);
+                        }
+                      if(this.tempEingabe[i][5] > this.tempEingabe[i][2])
+                        {
+                          this.ZeichnePfeil(this.startX + (this.tempEingabe[i][5] * 100 )+this.breite/2, this.startY + ( 100 )+this.hoehe/2, this.startX + (this.tempEingabe[i][2] * 100 )+this.breite/1.3, this.startY + ( 100 ), this.tempEingabe[i][5]*3); 
+                          this.KreisZeichnen(this.startX + (this.tempEingabe[i][5] * 100 ) + this.breite/2, this.startY + ( 100 )+this.hoehe/2);
+                        }
+                    }
+                  else  // Kein Pfeil notwendig
+                    {
+                        // ansonsten nichts tun
+                    }
+                  
+                  // Beschriftung ausgeben
+                  // [x][4] Beschriftung = "z.B ptr1"; 
+                  this.ZeichneText(this.tempEingabe[i][4], this.startX + (this.tempEingabe[i][5] * 100 ), this.startY + ( 100 ) - 10, 16)
+                  
+                  // Werte der Variablen zeichnen
+                  // [x][6] Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+                  if(this.tempEingabe[i][6]==999)
+                    {
+                      
+                    }
+                  else
+                    {
+                      this.ZeichneText(this.tempEingabe[i][6], this.startX + (this.tempEingabe[i][5] * 100 )+this.breite/5, this.startY + ( 100 ) + this.hoehe/2, 18)
+                    }
+                  
+                  }
+            
+    }
+    
+
+    
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
+    ZeichneQuellcode()                                                                         
+    {   
+        // Rahmen Startpunktdifferenz:
+      let d = 30;
+        this.context.font = 'bold 18px Arial';                                                     // Schrifteigenschaften
+        this.context.fillStyle = "black";                                                          // Schriftfarbe
+      
+        //this.context.fillText( "Gegeben ist das folgende C++ Programm:", 10, 50);
+ 
+        var gradient = this.context.createLinearGradient(this.textPosX-10,  this.textPosY-d, this.textPosX-10, this.n*70);  // Gradientenverlauf festlegen
+        gradient.addColorStop(0, "rgb(232,232,232)");
+        gradient.addColorStop(1, "rgb(232,232,232)");
+        this.context.fillStyle = gradient;
+        this.context.fillRect(this.textPosX-10, this.textPosY-d, 700, this.n*33);
+        this.context.lineWidth = 3;                                                                // Liniendicke
+        this.context.strokeStyle ="black";                                                         // Rahmenfarbe
+        this.context.font = 'bold 25px Courier';                                                   // Schrifteigenschaften
+        this.context.fillStyle = "black";                                                          // Schriftfarbe
+        this.context.strokeRect(this.textPosX-10, this.textPosY-d, 700, this.n*33)                // Rahmen Zeichnen abhängig von der Zeilenanzahl
+        
+
+
+        for(let i = 0; i<this.n; i++)                                                              // Quellcode ausgeben
+          {
+              this.context.fillText(this.quelltext[i], this.textPosX, this.textPosY + (i*30)); 
+          }
+      
+         this.context.font = 'bold 18px Arial';                                                     // Schrifteigenschaften
+         this.context.fillStyle = "black";                                                          // Schriftfarbe
+      
+       //   this.context.fillText( "Stellen Sie für jede der Programmzeilen die Belegung der Variablen und ihrer Zusammenhänge", 10, this.textPosY + (this.n*30) + 30);
+       //   this.context.fillText( "graphisch dar.", 10, this.textPosY + (this.n*30) + 30 + 30);
+       //   this.context.fillText( "Verändern Sie Pfeile, indem Sie zuerst auf die Zeigervariable klicken und dann auf die Variable", 10, this.textPosY + (this.n*30) + 30 + 30 + 30);
+        //  this.context.fillText( "auf die der Zeiger zeigt.", 10, this.textPosY + (this.n*30) + 30 + 30 + 30 + 30 );
+          
+    }
+    
+    
+    
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------
+    ZeichneRechteck(posX, posY, farbeRGB)                                                           // Parameter: Position jedes einzelnen Rechteckes und Farbe
+    {
+      this.context.lineWidth = 2;                                                                   // Rahmen - dicke der Linie
+      this.context.fillStyle = farbeRGB
+      this.context.strokeStyle = "black";
+      this.context.fillRect(posX, posY, this.breite, this.hoehe);
+      this.context.strokeRect(posX, posY, this.breite, this.hoehe); 
+    // this.context.fillStyle = farbeRGB;     
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    ZeichnePfeil(fromx, fromy, tox, toy, h)                                                             // Parameter: Startkoordinaten und Endkoordinaten
+    {
+      //Variablen
+      var kopfgroesse = 3;
+      var liniendicke = 2;
+      var farbe = "rgb(0,0,255)"
+
+      this.context.beginPath();
+      this.context.moveTo(fromx, fromy);
+      this.context.lineTo(fromx, fromy + this.hoehe + h);
+      this.context.lineTo(tox, fromy + this.hoehe + h);
+      this.context.lineTo(tox, fromy + (this.hoehe+h)/2+kopfgroesse*3);
+      
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.stroke();
+
+      // Pfeilspitze Zeichnen
+      this.context.beginPath();
+      this.context.moveTo(tox-kopfgroesse, fromy + (this.hoehe+h)/2+kopfgroesse*3);
+      this.context.lineTo(tox+kopfgroesse, fromy + (this.hoehe+h)/2+kopfgroesse*3);
+      this.context.lineTo(tox, fromy + (this.hoehe+h)/2+3);
+      this.context.lineTo(tox-kopfgroesse, fromy + (this.hoehe+h)/2+kopfgroesse*3);
+      this.context.lineTo(tox, fromy + (this.hoehe+h)/2+kopfgroesse*3);
+      
+      //draws the paths created above
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.fillStyle = farbe;
+      this.context.stroke();
+      this.context.fill();
+    }
+    
+    
+    //--------------------------------------------------------------------------------------------------------------------------------------
+   ZeichneQuellcodePfeil( pos)
+    {
+      let fromx = this.textPosX - 80;
+      let fromy = this.textPosY + 30*pos - 5;
+      
+      
+      var kopfgroesse = 8;
+      var liniendicke = 8;
+      var farbe = "rgb(255,0,0)"
+   
+      this.context.beginPath();
+      this.context.moveTo(fromx, fromy);
+      this.context.lineTo(fromx+50, fromy); 
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.stroke();                                             // Pfeildreiecke füllen
+      
+      // Pfeilspitze zeichnen
+      this.context.beginPath();  
+      this.context.moveTo(fromx+50, fromy);
+      this.context.lineTo(fromx+50, fromy-kopfgroesse);      
+      this.context.lineTo(fromx+50+10, fromy);  
+      this.context.lineTo(fromx+50, fromy+kopfgroesse); 
+      this.context.lineTo(fromx+50, fromy);       
+           
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.fillStyle = farbe;
+      this.context.stroke();
+    }
+    
+    
+    //-----------------------------------------------------------------------------------------------------------------------------
+   ZeichnePfeilKurz(fromx, fromy)
+    {
+      var kopfgroesse = 3;
+      var liniendicke = 2;
+      var pfeillaenge = this.breite/2+10;
+      var farbe = "rgb(0,0,255)"
+   
+      this.context.beginPath();
+      this.context.moveTo(fromx, fromy);
+      this.context.lineTo(fromx+pfeillaenge, fromy); 
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.stroke();
+      
+      
+      // Pfeilspitze zeichnen
+      this.context.beginPath();  
+      this.context.moveTo(fromx+pfeillaenge, fromy);
+      this.context.lineTo(fromx+pfeillaenge, fromy-kopfgroesse);      
+      this.context.lineTo(fromx+pfeillaenge+8, fromy);  
+      this.context.lineTo(fromx+pfeillaenge, fromy+kopfgroesse); 
+      this.context.lineTo(fromx+pfeillaenge, fromy);       
+           
+      this.context.strokeStyle = farbe;
+      this.context.lineWidth = liniendicke;
+      this.context.fillStyle = farbe;
+      this.context.stroke();
+      this.context.fill();                                                 // Pfeildreiecke füllen
+    }
+    
+
+    
+    //----------------------
+    ZeichneText(text, x, y, gr)
+    {
+        this.context.font = 'bold '+ gr +'px Courier';                                                   // Schrifteigenschaften
+        this.context.fillStyle = "black";
+        this.context.fillText(text, x, y); 
+    }
+    
+    //----------------------
+    KreisZeichnen(x,y)
+    {
+      this.context.fillStyle = "black";
+      this.context.beginPath();
+      this.context.arc(x, y, 5, 0, Math.PI * 2, true); // Outer circle
+      this.context.fill();
+    }
+    
+    //----------------------
+
+    // -------------------------------------------------------------------------------------------------------------------
+    
+    
+    
+    
+    // Auswahl der Variable oder des Zeigers
+    
+    ZeigerAnklickenPfeilNehmen(x, y)                                     
+    {
+      let gefunden = 999;
+      
+     let xPos = x - this.dX;   // Unterschied kompensieren
+      
+     let yPos = y - this.dY;   // Unterschied kompensieren
+      
+      for(let i=0; i< this.anzElem; i++)  
+        {
+          // Hier wird nach einen Zeiger oder nach ein Array gesucht
+          if((this.tempEingabe[i][0] == 1 || this.tempEingabe[i][0] == 2)  &&  (xPos > (this.tempEingabe[i][5]+1)*100) &&  (xPos < (this.tempEingabe[i][5]+1)*100 + this.breite) && (yPos > this.startY + 100) && (yPos < this.startY + 100 + this.breite))
+            {
+               
+               gefunden = 0;
+               
+               // Den Rechteck nun rot färben
+               if (this.tempEingabe[i][0] == 1)  // Zeiger
+                 {
+                   console.log("Pointer gefunden !!!"); 
+                   this.tempNext[i][1] = 1;                                                   // für den Vergleich notwendig
+                   
+                   this.tempEingabe[i][3] = "rgb(232,232,232)";
+                   this.itmp = i;
+                   this.ZeichneZeile(); 
+                   return gefunden;
+                 }
+              if (this.tempEingabe[i][0] == 2)   // Array
+                {
+                  console.log("Array gefunden !!!"); 
+                  this.tempNext[i][1] = 1;                                                    // für den Vergleich notwendig
+                  
+                  this.tempEingabe[i][3] = "rgb(232,232,232)";
+                  this.itmp = i;
+                  this.ZeichneZeile(); 
+                  return gefunden;
+                }
+             
+
+               break;
+            }
+          
+          // Hier wird nach eine Variable oder ein Element des Arrays gesucht 
+          if((this.tempEingabe[i][0] == 0 || this.tempEingabe[i][0] == 3)  &&  (xPos > (this.tempEingabe[i][5]+1)*100) &&  (xPos < (this.tempEingabe[i][5]+1)*100 + this.breite) && (yPos > this.startY + 100) && (yPos < this.startY + 100 + this.breite))
+            {      
+               gefunden = 1;
+              
+               // Die Rechtecke nun rot umranden
+               if (this.tempEingabe[i][0] == 0)                            // Variable
+                 { 
+                   console.log("Variable gefunden !!!"); 
+                   
+                   this.tempEingabe[i][3] = "rgb(232,232,232)";
+                   this.aktuellesElementEingabe = i;                       // Die Stelle der Variable für die Eingabe merken
+                   this.ZeichneZeile(); 
+                   return gefunden;
+                 }
+              if (this.tempEingabe[i][0] == 3)                             // Element des Arrays
+                {
+                  console.log("Element des Arrays gefunden !!!"); 
+      
+                  this.tempEingabe[i][3] = "rgb(232,232,232)";
+                  this.aktuellesElementEingabe = i;                       // Die Stelle der Variable für die Eingabe merken
+                  this.ZeichneZeile(); 
+                  return gefunden;
+                }
+              //this.ZeichneZeile(); 
+              break;
+            }
+        }
+      
+      
+      return gefunden;
+    }
+    
+    //--------------------------------------------------------------------------------------------------------------------
+
+
+    
+    
+    //--------------------------------------------------------------------------------------------------------------------
+    // Auswahl des Elements auf das der Zeiger zeigt oder Eingabe eines Wertes
+    ElementAnklickenPfeilAbsetzen(x, y)
+    {
+      let abgesetzt = 999;
+      
+     let xPos = x - this.dX;   // Unterschied kompensieren
+      
+     let yPos = y - this.dY;   // Unterschied kompensieren
+        
+      for(let i=0; i< this.anzElem; i++)  
+        {
+          // Hier wird nach einen Zeiger oder ein Array gesucht
+          if((this.tempEingabe[i][0] == 1 || this.tempEingabe[i][0] == 2)  &&  (xPos > (this.tempEingabe[i][5]+1)*100) &&  (xPos < (this.tempEingabe[i][5]+1)*100 + this.breite) && (yPos > this.startY + 100) && (yPos < this.startY + 100 + this.breite))
+            {              
+               abgesetzt = 0;
+               
+               // Die Rechtecke nun rot färben
+               if (this.tempEingabe[i][0] == 1 )                            // Zeiger
+                 {
+                   console.log("Pointer Gefunden !!!"); 
+                   this.tempNext[this.itmp][2] = i; 
+                  // this.tempNext[i][3] = "rgb(255,0,0)";
+                   
+                   //this.tempEingabe[this.itmp][2] = i;                     //
+                   this.tempEingabe[i][3] = "rgb(232,232,232)";
+                   this.ZeichneZeile(); 
+                   return abgesetzt;
+                 }
+              if (this.tempEingabe[i][0] == 2)                              // Array
+                {
+                  console.log("Array gefunden !!!");
+                  this.tempNext[this.itmp][2] = i;                      //
+                  //this.tempNext[i][3] = "rgb(255,0,0)";
+                  
+                  //this.tempEingabe[this.itmp][2] = i;                      //
+                  this.tempEingabe[i][3] = "rgb(232,232,232)";
+                  this.ZeichneZeile(); 
+                  return abgesetzt;
+                }
+              
+               break;
+            }
+          
+          // Hier wird nach eine Variable oder ein Element des Arrays gesucht
+          if((this.tempEingabe[i][0] == 0 || this.tempEingabe[i][0] == 3)  &&  (xPos > (this.tempEingabe[i][5]+1)*100) &&  (xPos < (this.tempEingabe[i][5]+1)*100 + this.breite) && (yPos > this.startY + 100) && (yPos < this.startY + 100 + this.breite))
+            {            
+               abgesetzt = 1;
+               
+              
+               // Die Rechtecke nun rot färben
+               if (this.tempEingabe[i][0] == 0)                             // Variable
+                 {
+                   console.log("Variable gefunden !!!"); 
+                   
+                   this.tempNext[this.itmp][2] = i; 
+                   
+                   this.tempEingabe[i][3] = "rgb(232,232,232)";
+                   this.ZeichneZeile(); 
+                   return abgesetzt;
+                 }
+               if (this.tempEingabe[i][0] == 3)                             // Element des Arrays
+                {
+                  console.log("Element des Arrays gefunden !!!");
+
+                  this.tempNext[this.itmp][2] = i; 
+                  
+                  this.tempEingabe[i][3] = "rgb(232,232,232)";
+                  this.ZeichneZeile(); 
+                  return abgesetzt;
+                }
+               
+              break;
+            }
+          }
+        
+      return abgesetzt;
+    }
+     
+    
+    //---------------------
+    // Zum Eingabe eines Wertes deer Variable
+    
+    WertEingeben(w)
+    {
+      this.tempNext[this.aktuellesElementEingabe][6] = w;
+      this.tempEingabe[this.aktuellesElementEingabe][6] = w;
+      //this.ZeichneZeile(); 
+      
+    }
+    
+    
+    
+    //-------------------------------------------------------------------------------------------
+    // Zum Schluss alles prüfen: variablenwerte und Zeiger:
+    EingabePruefen()  // Als Parameter wird aktuelle Zeilennummer übergeben
+    {
+      let richtig = true;
+          
+
+      
+          for(let i = 0; i<this.jMax; i++)
+            {
+              
+              for (let j = 0; j<this.merkmalenAnzahl; j++) 
+                {
+                   if(this.zustaende[this.aktuelleZeile+1][i][j] != this.tempNext[i][j])
+                    {
+                      richtig = false;
+                      //console.log("falsch !!!");
+                      break;
+                    }
+                }
+
+            if(richtig==false)
+              {
+                break;
+              }
+
+           } 
+      
+      //console.log(this.tempEingabe);     // nur für die Kontrolle auf der Konsole
+      console.log(this.tempNext);        // nur für die Kontrolle auf der Konsole
+      console.log(this.zustaende);       // nur für die Kontrolle auf der Konsole
+      
+      // ToDo Infofenster-Ausgabe
+      if(richtig==true)
+        {
+          console.log("richtig !!!");
+          
+        }
+      else
+        {
+           console.log("falsch !!!");
+        }
+      
+      return richtig;
+      
+    }
+
+    
+    //----------------------
+    CanvasLoeschen()
+    {
+      this.context.clearRect(0, 0, this.leinwandBreite, this.leinwandHoehe);
+    }
+    
+    
+    
+    //-------------------------------------------------------------------------------------------------------------------
+    // Bei einer richtigen Eingabe und Übergang zum nächsten Zustand
+    // Dazu müsssen die aktuelle zustände kopiert werden
+    
+    ZustaendeKopieren()
+    {
+      
+      for(let i =0; i<this.anzElem; i++)                                                                            // Am Anfang den Ausgangszustand speichern
+        {
+          for(let j=0; j<this.merkmalenAnzahl; j++)
+            {
+              this.tempEingabe[i][j] = this.zustaende[this.aktuelleZeile+1][i][j];  
+              this.tempNext[i][j] = this.zustaende[this.aktuelleZeile+1][i][j];                         // Hier werden aktuelle Werte eingetragen und danach mit tempEingabe verglichen
+            }                                                         
+        }
+      
+      this.aktuelleZeile = this.aktuelleZeile + 1;                                // Zeilennummer für für die nächste Spielsituation erhöhen
+      
+      // ToDo ..
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    // Zustände für einen Schritt zurück setzen
+    AktuellenZustandReseten()
+    {
+      
+      for(let i =0; i<this.anzElem; i++)                                                                            // Am Anfang den Ausgangszustand speichern
+        {
+          for(let j=0; j<this.merkmalenAnzahl; j++)
+            {
+              this.tempEingabe[i][j] = this.zustaende[this.aktuelleZeile][i][j];  
+              this.tempNext[i][j] = this.zustaende[this.aktuelleZeile][i][j];                         // Hier werden aktuelle Werte eingetragen und danach mit tempEingabe verglichen
+            }                                                         
+        }
+      
+    }
+    
+    
+    //------------------------------------------------------------------------------------------------------------------
+    // Die Funktion überprüft, ob alle Zeilen gelöst sind. Wenn ja, dann Spielende.
+    istSpielende()
+    {
+      console.log(this.aktuelleZeile);
+      console.log(this.iMax);
+      if(this.aktuelleZeile>=this.iMax-2)                                                                                     // ?
+        {
+          return true;
+        }
+      else
+        {
+          return false;
+        }
+      
+    }
+    
+    
+    //----------------------
+  TextausgabeFenster(text) 
+  {   
+     // let h=80;
+      //let b=500;
+      let x=900;                        // Position
+      let y=150;                         // Position
+    
+    
+    	//var messure = this.context.measureText(text);
+	
+	    var w = 500;
+	    var h = 50;
+	
+	    this.context.beginPath();
+	    this.context.strokeStyle="black";
+	    this.context.lineWidth="2";
+	    this.context.fillStyle="rgb(255,255,0)";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + (w*0.2), y);
+	    this.context.lineTo(x + (w*0.2), y+10);
+	    this.context.lineTo(x + (w*0.3), y);
+	    this.context.lineTo(x + w, y);
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y, x + (w*1.1), y-(h*0.2)); // corner: right-bottom
+	
+	    this.context.lineTo(x + (w*1.1), y-(h*0.8)); // right
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y-h, x + w, y-h); // corner: right-top
+	
+      this.context.lineTo(x, y-h); // top
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y-h, x - (w*0.1), y-(h*0.8)); // corner: left-top
+	
+	    this.context.lineTo(x - (w*0.1), y-(h*0.2)); // left
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y, x, y); // corner: left-bottom
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+	
+	    this.context.textAlign = 'left';
+	    this.context.fillStyle = '#000';
+      this.context.font = 'bold 18px calibri';                                                     // Schrifteigenschaften
+	    this.context.fillText(text, x, y-20);
+    
+    
+    
+    
+    
+/*	    this.context.beginPath();
+	    this.context.strokeStyle="black";
+	    this.context.lineWidth="2";
+	    this.context.fillStyle="rgb(255,255,0)";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + b, y);
+	    this.context.lineTo(x + b, y+h);
+	    this.context.lineTo(x, y+h);
+      this.context.lineTo(x, y);
+    
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+	    this.context.font = '16px Arial';
+	    this.context.textAlign = 'left';
+	    this.context.fillStyle = '#000';
+     
+	    this.context.fillText(text, x+10, y+30);*/
+  }
+    //----------------------
+    TextausgabeFensterLoeschen()
+    {
+      //let h=80;
+      //let b=500;
+      let x=850;                         // Position
+      let y=100;                         // Position
+    
+    
+    	//var messure = this.context.measureText(text);
+	
+	    var b = 800;//
+	    var h = 200;
+	/*
+	    this.context.beginPath();
+	    this.context.strokeStyle="white";
+	    this.context.lineWidth="4";
+	    this.context.fillStyle="white";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + (w*0.2), y);
+	    this.context.lineTo(x + (w*0.2), y+10);
+	    this.context.lineTo(x + (w*0.3), y);
+	    this.context.lineTo(x + w, y);
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y, x + (w*1.1), y-(h*0.2)); // corner: right-bottom
+	
+	    this.context.lineTo(x + (w*1.1), y-(h*0.8)); // right
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y-h, x + w, y-h); // corner: right-top
+	
+      this.context.lineTo(x, y-h); // top
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y-h, x - (w*0.1), y-(h*0.8)); // corner: left-top
+	
+	    this.context.lineTo(x - (w*0.1), y-(h*0.2)); // left
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y, x, y); // corner: left-bottom
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+*/
+      
+     // let h=80;                         // Höhe
+     // let b=500;                        // Breite
+     // let x=900;                        // Position
+     // let y=65;                         // Position
+	    this.context.beginPath();
+	    this.context.strokeStyle="white";
+	    this.context.lineWidth="4";
+	    this.context.fillStyle="white";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + b, y);
+	    this.context.lineTo(x + b, y+h);
+	    this.context.lineTo(x, y+h);
+      this.context.lineTo(x, y);
+    
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath(); 
+    }
+    //----------------------
+    //----------------------
+    //----------------------
+    //----------------------
+    
+    speechBubble(text, x, y)  // Nur zum Debuggen
+    {
+	    var messure = this.context.measureText(text);
+	
+	    var w = messure.width;
+	    var h = 30;
+	
+	    this.context.beginPath();
+	    this.context.strokeStyle="black";
+	    this.context.lineWidth="2";
+	    this.context.fillStyle="rgb(255,255,0)";
+	
+    	this.context.moveTo(x, y);
+    	this.context.lineTo(x + (w*0.2), y);
+	    this.context.lineTo(x + (w*0.2), y+10);
+	    this.context.lineTo(x + (w*0.3), y);
+	    this.context.lineTo(x + w, y);
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y, x + (w*1.1), y-(h*0.2)); // corner: right-bottom
+	
+	    this.context.lineTo(x + (w*1.1), y-(h*0.8)); // right
+	
+	    this.context.quadraticCurveTo(x + (w*1.1), y-h, x + w, y-h); // corner: right-top
+	
+      this.context.lineTo(x, y-h); // top
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y-h, x - (w*0.1), y-(h*0.8)); // corner: left-top
+	
+	    this.context.lineTo(x - (w*0.1), y-(h*0.2)); // left
+	
+	    this.context.quadraticCurveTo(x - (w*0.1), y, x, y); // corner: left-bottom
+	
+	    this.context.fill();
+	    this.context.stroke();
+	    this.context.closePath();
+	
+	    this.context.textAlign = 'left';
+	    this.context.fillStyle = '#000';
+      this.context.font = 'bold 22px calibri';                                                     // Schrifteigenschaften
+	    this.context.fillText(text, x, y-6);
+
+    } 
+    
+    
+    
+    
+  }
+
+    </script>
+    
+    
+    <!----------------------- default-Wert für das Auswahlfeld festlegen ------------------------------>
+    
+      <script>
+           var temp = 1;                                      //<!-- Hier festlegen -->
+           var mySelect = document.getElementById('mySelect');
+
+          for(var i, j = 0; i = mySelect.options[j]; j++) 
+          {
+            if(i.value == temp) 
+            {
+                mySelect.selectedIndex = j;
+                break;
+            }
+          }
+      </script>
+    
+
+<script>
+// =============================================================================== main ==========================================================================================
+
+// main.js
+
+// Hier, in der main-Datei erfolgt die Steuerung von html-Elementen abhängig von der Ausgangssituation der Aufgabenstellung
+
+//=============================== Spielsituation speichern=======================================================
+
+//var anzahl_elem = 0;
+
+//let iMax = 6;                                                                             // Anzahl von Zuständen muss angegeben werden
+//let jMax = 7;                                                                            // Anzahl von Elementen kann ermittelt werden
+
+//========================================= Quellcode Nr. 1 ==========================================
+let iMax1 = 6; // Anzahl von Zuständen muss angegeben werden
+var zustaende = new Array(iMax1);
+for (let i = 0; i < iMax1; i++) {
+  zustaende[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende[0][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[0][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "A");
+zustaende[0][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "B");
+zustaende[0][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[0][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[0][5] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[0][6] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 6, 999);
+
+//anzahl_elem = zustaende[0].length;                                                     // die anzahl soll immer entsprechend dem Quellcode ermittelt werden
+
+// Zeile 1
+zustaende[1][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[1][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "A");
+zustaende[1][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "B");
+zustaende[1][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[1][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[1][5] = new Array(1, 1, 4, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[1][6] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 6, 999);
+
+// Zeile 2
+zustaende[2][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[2][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "A");
+zustaende[2][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "B");
+zustaende[2][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[2][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[2][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[2][6] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 6, 999);
+
+// Zeile 3
+zustaende[3][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[3][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "A");
+zustaende[3][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "B");
+zustaende[3][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[3][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[3][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[3][6] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr2", 6, 999);
+
+// Zeile 4
+zustaende[4][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[4][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "C");
+zustaende[4][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "B");
+zustaende[4][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[4][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[4][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[4][6] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr2", 6, 999);
+
+// Zeile 5
+zustaende[5][0] = new Array(2, 1, 1, "rgb(0,200,255)", "array", 0, 999);
+zustaende[5][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[0]", 1, "C");
+zustaende[5][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[1]", 2, "C");
+zustaende[5][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[2]", 3, "C");
+zustaende[5][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", "[3]", 4, "\\0");
+zustaende[5][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999);
+zustaende[5][6] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr2", 6, 999);
+// Bis hier richtig
+
+// Quelltext
+var text_1 = new Array();
+
+text_1[0] = ' char array[4] = {"ABC"}; ';
+text_1[1] = " char *ptr1, **ptr2;";
+text_1[2] = " ptr1 = &array[3]; ";
+text_1[3] = " ptr1 = ptr1 - 3; ";
+text_1[4] = " ptr2 = &ptr1; ";
+text_1[5] = " (*ptr2)[0] = array[2]; ";
+text_1[6] = " (*ptr2)[1] = *ptr1; ";
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 2 ==================================================
+let iMax2 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende2 = new Array(iMax2);
+for (let i = 0; i < iMax2; i++) {
+  zustaende2[i] = new Array();
+}
+
+// Beschreibung der Bedeutung:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3;
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer = von 0 bis 11(wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer von 0 - 11;
+// [x][6] Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende2[0][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 2);
+zustaende2[0][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[0][2] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[0][3] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[0][4] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 1
+
+zustaende2[1][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 2);
+zustaende2[1][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[1][2] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[1][3] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[1][4] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 2
+
+zustaende2[2][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 2);
+zustaende2[2][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[2][2] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[2][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[2][4] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 3
+
+zustaende2[3][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 2);
+zustaende2[3][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[3][2] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[3][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[3][4] = new Array(1, 1, 2, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 4
+
+zustaende2[4][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 4);
+zustaende2[4][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[4][2] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[4][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[4][4] = new Array(1, 1, 2, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 5
+
+zustaende2[5][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 4);
+zustaende2[5][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 4);
+zustaende2[5][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[5][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[5][4] = new Array(1, 1, 2, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 6
+
+zustaende2[6][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 4);
+zustaende2[6][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 20);
+zustaende2[6][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[6][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[6][4] = new Array(1, 1, 2, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 7
+
+zustaende2[7][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 4);
+zustaende2[7][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 20);
+zustaende2[7][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[7][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[7][4] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr3", 4, 999);
+
+// Zeile 8
+
+zustaende2[8][0] = new Array(0, 999, 999, "rgb(0,255,0)", "  a", 0, 4);
+zustaende2[8][1] = new Array(0, 999, 999, "rgb(0,255,0)", "  b", 1, 8000);
+zustaende2[8][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 2, 999);
+zustaende2[8][3] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 3, 999);
+zustaende2[8][4] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr3", 4, 999);
+
+var text_2 = new Array();
+
+text_2[0] = " int a = 2, b = 4; ";
+text_2[1] = " int *ptr1, *ptr2, **ptr3; ";
+text_2[2] = " ptr1 = &a; ";
+text_2[3] = " ptr2 = &b; ";
+text_2[4] = " ptr3 = &ptr1; ";
+text_2[5] = " *ptr1 += 2; ";
+text_2[6] = " *ptr3 = ptr2; ";
+text_2[7] = " **ptr3 *= 5; ";
+text_2[8] = " ptr3 = &ptr2; ";
+text_2[9] = " **ptr3 = *ptr1 **ptr2 ***ptr3 ";
+
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 3  ==================================================
+
+let iMax3 = 5; // Anzahl von Zuständen muss angegeben werden
+var zustaende3 = new Array(iMax3);
+for (let i = 0; i < iMax3; i++) {
+  zustaende3[i] = new Array();
+}
+
+// Beschreibung der Bedeutung:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3;
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer = von 0 bis 11(wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer von 0 - 11;
+// [x][6] Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende3[0][0] = new Array(0, 999, 999, "rgb(0,255,0)", "alpha", 0, 999);
+zustaende3[0][1] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr1", 1, 999);
+zustaende3[0][2] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 2, 999);
+
+// Zeile 1
+zustaende3[1][0] = new Array(0, 999, 999, "rgb(0,255,0)", "alpha", 0, 999);
+zustaende3[1][1] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 1, 999);
+zustaende3[1][2] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 2, 999);
+
+// Zeile 2
+zustaende3[2][0] = new Array(0, 999, 999, "rgb(0,255,0)", "alpha", 0, 5);
+zustaende3[2][1] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 1, 999);
+zustaende3[2][2] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 2, 999);
+
+// Zeile 3
+zustaende3[3][0] = new Array(0, 999, 999, "rgb(0,255,0)", "alpha", 0, 5);
+zustaende3[3][1] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 1, 999);
+zustaende3[3][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 2, 999);
+
+// Zeile 4
+zustaende3[4][0] = new Array(0, 999, 999, "rgb(0,255,0)", "alpha", 0, 6);
+zustaende3[4][1] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 1, 999);
+zustaende3[4][2] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr2", 2, 999);
+
+var text_3 = new Array();
+
+text_3[0] = "int alpha; ";
+text_3[1] = "int* ptr1, ** ptr2;";
+text_3[2] = "ptr1 = &alpha; ";
+text_3[3] = "*ptr1 = 5; ";
+text_3[4] = "ptr2 = &ptr1;  ";
+text_3[5] = "*ptr1 = **ptr2 + 1; ";
+
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 4 ===================================================
+
+let iMax4 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende4 = new Array(iMax4);
+
+for (let i = 0; i < iMax4; i++) {
+  zustaende4[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende4[0][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[0][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[0][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[0][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 0); // Elem. des Arrays
+zustaende4[0][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[0][5] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[0][6] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[0][7] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[0][8] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 1 :
+
+zustaende4[1][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[1][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[1][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[1][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 0); // Elem. des Arrays
+zustaende4[1][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[1][5] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[1][6] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[1][7] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[1][8] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 2 :
+
+zustaende4[2][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[2][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[2][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[2][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 0); // Elem. des Arrays
+zustaende4[2][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[2][5] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[2][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[2][7] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[2][8] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 3 :
+
+zustaende4[3][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[3][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[3][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[3][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 0); // Elem. des Arrays
+zustaende4[3][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[3][5] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[3][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[3][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[3][8] = new Array(1, 0, 999, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 4 :
+
+zustaende4[4][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[4][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[4][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[4][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 0); // Elem. des Arrays
+zustaende4[4][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[4][5] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[4][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[4][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[4][8] = new Array(1, 1, 6, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 5 :
+
+zustaende4[5][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[5][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[5][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[5][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 2); // Elem. des Arrays
+zustaende4[5][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[5][5] = new Array(1, 1, 0, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[5][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[5][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[5][8] = new Array(1, 1, 6, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 6 :
+
+zustaende4[6][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[6][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[6][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[6][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 2); // Elem. des Arrays
+zustaende4[6][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 0); // Elem. des Arrays
+zustaende4[6][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[6][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[6][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[6][8] = new Array(1, 1, 6, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 7 :
+
+zustaende4[7][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[7][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 20); // Variable
+zustaende4[7][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[7][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 2); // Elem. des Arrays
+zustaende4[7][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 20); // Elem. des Arrays
+zustaende4[7][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[7][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[7][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[7][8] = new Array(1, 1, 6, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+// Zeile 8 :
+
+zustaende4[8][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 0, 2); // Variable
+zustaende4[8][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", " b", 1, 22); // Variable
+zustaende4[8][2] = new Array(2, 1, 3, "rgb(0, 255, 0)", " A", 2, 999); // Array
+zustaende4[8][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 3, 2); // Elem. des Arrays
+zustaende4[8][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 4, 20); // Elem. des Arrays
+zustaende4[8][5] = new Array(1, 1, 1, "rgb(0,200,255)", "ptr1", 5, 999); // Zeiger
+zustaende4[8][6] = new Array(1, 1, 3, "rgb(0,200,255)", "ptr2", 6, 999); // Zeiger
+zustaende4[8][7] = new Array(1, 1, 5, "rgb(0,200,255)", "ptr3", 7, 999); // Zeiger auf Zeiger
+zustaende4[8][8] = new Array(1, 1, 6, "rgb(0,200,255)", "ptr4", 8, 999); // Zeiger auf Zeiger
+
+var text_4 = new Array();
+
+text_4[0] = "int a = 2, b = 20, A[2] = {0, 0}";
+text_4[1] = "int *ptr1, *ptr2, **ptr3, **ptr4;";
+text_4[2] = "ptr1 = &a;";
+text_4[3] = "ptr2 = A;";
+text_4[4] = "ptr3 = &ptr1;";
+text_4[5] = "ptr4 = &ptr2;";
+text_4[6] = "**ptr4 = 2;";
+text_4[7] = "ptr1 = &b;";
+text_4[8] = "*(*ptr4 + 1) = 20;";
+text_4[9] = "**ptr3 = **ptr4 + *(*ptr4 + 1); ";
+
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 5 ===================================================
+let iMax5 = 7; // Anzahl von Zuständen muss angegeben werden
+var zustaende5 = new Array(iMax5);
+
+for (let i = 0; i < iMax5; i++) {
+  zustaende5[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende5[0][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[0][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[0][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[0][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 0); // Variable
+zustaende5[0][4] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[0][5] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 1:
+
+zustaende5[1][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[1][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[1][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[1][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 0); // Variable
+zustaende5[1][4] = new Array(1, 1, 0, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[1][5] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 2:
+
+zustaende5[2][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[2][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[2][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[2][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 0); // Variable
+zustaende5[2][4] = new Array(1, 1, 0, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[2][5] = new Array(1, 1, 2, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 3:
+
+zustaende5[3][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[3][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[3][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[3][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 4700); // Variable
+zustaende5[3][4] = new Array(1, 1, 0, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[3][5] = new Array(1, 1, 2, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 4:
+
+zustaende5[4][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[4][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[4][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[4][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 4700); // Variable
+zustaende5[4][4] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[4][5] = new Array(1, 1, 2, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 5:
+
+zustaende5[5][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[5][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[5][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[5][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 4700); // Variable
+zustaende5[5][4] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[5][5] = new Array(1, 1, 3, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+// Zeile 6:
+
+zustaende5[6][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a", 0, 47); // Variable
+zustaende5[6][1] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  b", 1, 11); // Variable
+zustaende5[6][2] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  c", 2, 100); // Variable
+zustaende5[6][3] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  d", 3, 4711); // Variable
+zustaende5[6][4] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 4, 999); // Zeiger
+zustaende5[6][5] = new Array(1, 1, 3, "rgb(0,200,255)", " ptr2", 5, 999); // Zeiger
+
+var text_5 = new Array();
+text_5[0] = "int a = 47, b = 11, c = 100, d = 0;";
+text_5[1] = "int* ptr1, * ptr2;";
+text_5[2] = "ptr1 = &a;";
+text_5[3] = "ptr2 = &c;";
+text_5[4] = "d = *ptr1 * *ptr2;";
+text_5[5] = "ptr1 = &b;";
+text_5[6] = "ptr2 = &d;";
+text_5[7] = "*ptr2 = *ptr2 + *ptr1;";
+
+
+//=======================================================================================================================
+
+//================================================= Quellcode Nr. 6 =====================================================
+
+
+let iMax6 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende6 = new Array(iMax6);
+for (let i = 0; i < iMax6; i++) {
+  zustaende6[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende6[0][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[0][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 0); // Element des Arrays
+zustaende6[0][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende6[0][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[0][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[0][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[0][6] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[0][7] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[0][8] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 1
+
+zustaende6[1][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[1][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 0); // Element des Arrays
+zustaende6[1][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende6[1][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[1][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[1][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[1][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[1][7] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[1][8] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 2
+
+zustaende6[2][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[2][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 0); // Element des Arrays
+zustaende6[2][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende6[2][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[2][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[2][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[2][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[2][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[2][8] = new Array(1, 0, 999, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 3
+
+zustaende6[3][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[3][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 0); // Element des Arrays
+zustaende6[3][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende6[3][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[3][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[3][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[3][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[3][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[3][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 4
+
+zustaende6[4][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[4][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 4); // Element des Arrays
+zustaende6[4][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende6[4][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[4][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[4][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[4][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[4][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[4][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 5
+
+zustaende6[5][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[5][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 4); // Element des Arrays
+zustaende6[5][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 7); // Element des Arrays
+zustaende6[5][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Element des Arrays
+zustaende6[5][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[5][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[5][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[5][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[5][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 6
+
+zustaende6[6][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[6][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 4); // Element des Arrays
+zustaende6[6][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 7); // Element des Arrays
+zustaende6[6][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 1); // Element des Arrays
+zustaende6[6][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Element des Arrays
+zustaende6[6][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[6][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[6][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[6][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 7
+
+zustaende6[7][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[7][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 4); // Element des Arrays
+zustaende6[7][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 7); // Element des Arrays
+zustaende6[7][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 1); // Element des Arrays
+zustaende6[7][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 1); // Element des Arrays
+zustaende6[7][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 0); // Variable
+zustaende6[7][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[7][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[7][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Zeile 8
+
+zustaende6[8][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende6[8][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 4); // Element des Arrays
+zustaende6[8][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 7); // Element des Arrays
+zustaende6[8][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 1); // Element des Arrays
+zustaende6[8][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 1); // Element des Arrays
+zustaende6[8][5] = new Array(0, 999, 999, "rgb(0, 255, 0)", " a", 5, 4711); // Variable
+zustaende6[8][6] = new Array(1, 1, 1, "rgb(0,200,255)", " ptr1", 6, 999); // Zeiger
+zustaende6[8][7] = new Array(1, 1, 6, "rgb(0,200,255)", " ptr2", 7, 999); // Zeiger
+zustaende6[8][8] = new Array(1, 1, 7, "rgb(0,200,255)", " ptr3", 8, 999); // Zeiger
+
+// Todo: Zustände definieren
+
+var text_6 = new Array();
+
+text_6[0] = "int A[4] = {0, 0, 0, 0}, a = 0;";
+text_6[1] = "int * ptr1, ** ptr2, *** ptr3;";
+text_6[2] = "ptr1 = A;";
+text_6[3] = "ptr2 = &ptr1;";
+text_6[4] = "ptr3 = &ptr2;";
+text_6[5] = "***ptr3 = 4;";
+text_6[6] = "*(**ptr3 + 1) = 7;";
+text_6[7] = "*(**ptr3 + 2) = 1;";
+text_6[8] = "*(**ptr3 + 3) = 1;";
+text_6[9] = "a = ***ptr3 * 1000 + *(**ptr3+1) * 100";
+text_6[10] = "        + *(**ptr3 + 2) * 10 + *(**ptr3 + 3);";
+
+
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 7 ==========================================
+
+let iMax7 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende7 = new Array(iMax7);
+for (let i = 0; i < iMax7; i++) {
+  zustaende7[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende7[0][0] = new Array(2, 1, 1, "rgb(0, 255, 0)", "  A", 0, 999); // Array
+zustaende7[0][1] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [0]", 1, 0); // Element des Arrays
+zustaende7[0][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2, 0); // Element des Arrays
+zustaende7[0][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3, 0); // Variable
+zustaende7[0][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4, 0); // Zeiger
+
+// Todo: Zustände definieren
+
+var text_7 = new Array();
+text_7[0] = "int A[2] = { 4711, 0}, a = 0;";
+text_7[1] = "int* ptr1;";
+text_7[2] = "ptr1 = A;";
+text_7[3] = "a = *ptr1;";
+text_7[4] = "*ptr1 = 0;";
+text_7[5] = "ptr1 = &A[1];";
+text_7[6] = "*ptr1 = a;";
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 8 ==========================================
+
+let iMax8 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende8 = new Array(iMax8);
+for (let i = 0; i < iMax8; i++) {
+  zustaende8[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+// Todo: Zustände definieren
+
+var text_8 = new Array();
+
+text_8[0] = "int a = 2;";
+text_8[1] = "int *ptr1, **ptr2, ***ptr3, ****ptr4;";
+text_8[2] = "ptr1= &a;";
+text_8[3] = "ptr2 = &ptr1;";
+text_8[4] = "ptr3 = &ptr2;";
+text_8[5] = "ptr4 = &ptr3;";
+text_8[6] = "*ptr1 = a + 2;"; // a=4
+text_8[7] = "**ptr2 = *ptr1 + a;"; // a=8
+text_8[8] = "***ptr3 = **ptr2 + *ptr1 + a;"; // a=24
+text_8[9] = "****ptr4 = ***ptr3 + **ptr2 - *ptr1 - a;"; // a=0
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 9 ==========================================
+
+let iMax9 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende9 = new Array(iMax9);
+for (let i = 0; i < iMax9; i++) {
+  zustaende9[i] = new Array();
+}
+
+// Beschreibung der Parameter für Zeiger und Variablen:
+// [x][0] Zeiger = 1, Variable = 0, Array = 2, Element eines Arrays = 3, // (nicht verwendet): Variable rot = 4 Zeiger rot = 5, Array rot = 6, Element eines Arrays rot = 7
+// [x][1] kurzes Pfeil = 0, langes Pfeil = 1, kein Pfeil = 999;
+// [x][2] Zeigt auf Positionsnummer (wenn diese Variable ein Zeiger ist, ansonsten 999)
+// [x][3] Farbe = "rgb(0,0,255)";
+// [x][4] Beschriftung = "z.B ptr1";
+// [x][5] Position = Zeilennummer ;
+// [x][6] Z. B.: Wert = 5 (Wenn die Variable kein Zeiger ist, ansonsten 999);
+// ToDo...
+// [x][7] ...
+// [x][8] ...
+// [x][9] ...
+// [x][10] ...
+
+// Zeile 0  (Ausgangssituation definieren):
+
+zustaende9[0][0] = new Array(0, 999, 999, "rgb(0, 255, 0)", "  a",  0,  15);     // Variable
+zustaende9[0][1] = new Array(2,   1,   2, "rgb(0, 255, 0)", "  b",  1, 999);     // Array
+zustaende9[0][2] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [1]", 2,  11);     // Element des Arrays
+zustaende9[0][3] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [2]", 3,  12);     // Element des Arrays
+zustaende9[0][4] = new Array(3, 999, 999, "rgb(0, 255, 0)", " [3]", 4,  13);     // Element des Arrays
+zustaende9[0][5] = new Array(1,   0, 999, "rgb(0,200,255)", "  x1", 5, 999);     // Zeiger
+zustaende9[0][6] = new Array(1,   0, 999, "rgb(0,200,255)", "  x2", 6, 999);     // Zeiger
+zustaende9[0][7] = new Array(1,   0, 999, "rgb(0,200,255)", "  y1", 7, 999);     // Zeiger
+zustaende9[0][8] = new Array(1,   0, 999, "rgb(0,200,255)", "  y2", 8, 999);     // Zeiger
+
+
+// Todo: Zustände definieren
+
+var text_9 = new Array();
+text_9[0]  = "int a = 15, b[] = { 11, 12, 13 };"      ;
+text_9[1]  = "int* x1, * x2, ** y1, ** y2; "          ;
+text_9[2]  = "x1 = &a;"                               ;
+text_9[3]  = "x2 = x1;"                               ;
+text_9[4]  = "x1 = &b[1]; "                           ;
+text_9[5]  = "x2 = x1 - 1; "                          ;
+text_9[6]  = "y1 = &x2; "                             ;
+text_9[7]  = "*y1 = x1;"                              ;
+text_9[8]  = "y2 = y1;"                               ;
+text_9[9]  = "x1 = &a;"                               ; 
+text_9[10] = "y1 = &x1;"                              ;
+text_9[11] = "*x2 = a * *(*y2 + 1);"                  ;
+text_9[12] = "**y1 = 1;"                              ;
+text_9[13] = "x2[-1] = 24 * **y2 + *(*y2 + *x1) + 18;";
+
+
+
+//=============================================================================================================
+
+//========================================= Quellcode Nr. 10 ==========================================
+
+let iMax10 = 9; // Anzahl von Zuständen muss angegeben werden
+var zustaende10 = new Array(iMax10);
+for (let i = 0; i < iMax10; i++) {
+  zustaende10[i] = new Array();
+}
+
+// Todo: Zustände definieren
+
+var text_10 = new Array();
+text_10[0] = " ";
+text_10[1] = " ";
+text_10[2] = " ";
+text_10[3] = " ";
+text_10[4] = " ";
+text_10[5] = " ";
+text_10[6] = " ";
+//=============================================================================================================
+
+// ============================================= Test der einzelnen Funktionen - SpielT ==============================================
+
+/*
+T1.ZeichneRechteck(  50, 50, "rgb(0,250,  0)" );       // Rechtecke zeichnen
+T1.ZeichneRechteck( 150, 50, "rgb(0,200,255)" );
+T1.ZeichneRechteck( 250, 50, "rgb(0,250,  0)" );
+T1.ZeichneRechteck( 350, 50, "rgb(0,250,  0)" );
+T1.ZeichneRechteck( 450, 50, "rgb(0,250,  0)" );
+T1.ZeichneRechteck( 550, 50, "rgb(0,250,  0)" );
+T1.ZeichneRechteck( 650, 50, "rgb(0,200,255)" );
+T1.ZeichneRechteck( 750, 50, "rgb(0,200,255)" );
+T1.ZeichneRechteck( 850, 50, "rgb(0,200,255)" );
+T1.ZeichneRechteck( 950, 50, "rgb(0,200,255)" );
+
+
+T1.ZeichnePfeil(200, 300, 400, 300)                    // Pfeile zeichnen
+T1.ZeichnePfeil(300, 350, 500, 300)
+T1.ZeichnePfeil(500, 200, 100, 200)
+T1.ZeichnePfeil( 150+15, 50+15, 250 + 15, 50)                    
+
+T1.ZeichneQuellcodePfeil(1118,95)                      // Pfeil zeichnen
+T1.ZeichneQuellcodePfeil(1118,125)
+T1.ZeichneQuellcodePfeil(1118,155)
+T1.ZeichneQuellcodePfeil(1118,185)
+T1.ZeichneQuellcodePfeil(1118,215)
+T1.ZeichneQuellcodePfeil(1118,245)
+T1.ZeichneQuellcodePfeil(1118,275)
+
+T1.ZeichnePfeilKurz(950+15, 50+15)                     // Kutze Pfeile zeichnen
+T1.ZeichnePfeilKurz(850+15, 50+15) 
+T1.ZeichnePfeilKurz(750+15, 50+15)
+T1.ZeichnePfeilKurz(650+15, 50+15)
+
+
+
+//console.log(zustaende);
+T1.Ausgabe();
+*/
+//console.log("Anzahl: " + zustaende[0].length);
+
+// ================================================================================================================================================================================================
+// ===================================== MAIN =====================================================================================================================================================
+// ================================================================================================================================================================================================
+
+var state = 1; // Beim ersten Start Zustand = 1
+var substate = 0;
+var schritt_nummer = 0; // Im Quellcodefenster: Position des Pfeils auf aktuelle Zeile
+let x_Koordinate = 0; // angecklikte x- Koordinate der Maus
+let y_Koordinate = 0; // angecklikte y- Koordinate der Maus
+let AufgabenNr = 1; // Variable für aktuelle Aufgabe
+let eingabeArt = 999; // =0 Variable, =1 Wert, =999 noch nicht ausgewählt
+let wert = 0;
+let eingabeErfolgt = false;
+
+// Merken die Reihenfolge was als erstes und was als zweites angeklickt wird. z.B. zwei mal Variable ist falsche Angabe
+let ersterClick = 999; // 999-kein Objekt 1-Variable
+let zweiterClick = 999; // 999-kein Objekt 1-Variable
+
+// Merken die Reihenfolge was als erstes und was als zweites angeklickt wird. z.B. zwei mal Variable ist falsche Angabe
+
+// Objekte für verschiedene Aufgaben anlegen:
+var T1 = new SpielT(
+  text_1,
+  text_1.length,
+  zustaende,
+  iMax1,
+  MausBewegungsHandlerOnClick
+);
+var T2 = new SpielT(
+  text_2,
+  text_2.length,
+  zustaende2,
+  iMax2,
+  MausBewegungsHandlerOnClick
+);
+var T3 = new SpielT(
+  text_3,
+  text_3.length,
+  zustaende3,
+  iMax3,
+  MausBewegungsHandlerOnClick
+);
+var T4 = new SpielT(
+  text_4,
+  text_4.length,
+  zustaende4,
+  iMax4,
+  MausBewegungsHandlerOnClick
+);
+var T5 = new SpielT(
+  text_5,
+  text_5.length,
+  zustaende5,
+  iMax5,
+  MausBewegungsHandlerOnClick
+);
+var T6 = new SpielT(
+  text_6,
+  text_6.length,
+  zustaende6,
+  iMax6,
+  MausBewegungsHandlerOnClick
+);
+//var T7 = new SpielT(text_3, text_3.length, zustaende3, 5, MausBewegungsHandlerOnClick, MausBewegungsHandlerOnMouseMove);
+//var T8 = new SpielT(text_3, text_3.length, zustaende3, 5, MausBewegungsHandlerOnClick, MausBewegungsHandlerOnMouseMove);
+//var T9 = new SpielT(text_3, text_3.length, zustaende3, 5, MausBewegungsHandlerOnClick, MausBewegungsHandlerOnMouseMove);
+//var T10 = new SpielT(text_3, text_3.length, zustaende3, 5, MausBewegungsHandlerOnClick, MausBewegungsHandlerOnMouseMove);
+
+Switch_Aufgabenauswahl("1"); // per Default wird erste Aufgabe am Anfang
+
+//---------------------Auswahlfeld-event---------
+var mySelect = document.getElementById("mySelect");
+mySelect.onchange = function() {
+  var x = document.getElementById("mySelect").value;
+  //Nr=x;
+  console.log("Aufgabe " + x + " ausgewählt");
+  AllesZuruecksetzen(); //
+  Switch_Aufgabenauswahl(x);
+  AufgabenNr = x;
+  state = 1;
+};
+
+//-------------------Event beim Klick------------
+function MausBewegungsHandlerOnClick(event) {
+  let x_temp = event.pageX;
+  let y_temp = event.pageY;
+  x_Koordinate = x_temp - 8; // x-Koordinate des Mauszeigers auslesen
+  y_Koordinate = y_temp - 68; // y-Koordinate des Mauszeigers auslesen
+  // T1.speechBubble("x=" + (x_Koordinate) + ", y=" + (y_Koordinate), 1000, 150);                        // x-30 und y-96, da der Leinwand nicht direkt in der Ecke anfängt
+  //console.log("x= " + x_Koordinate + ", y= " + y_Koordinate);
+  //state = 2;                                                                                          // Übergang zum nächsten Zustand
+  Main(); // Main-Funktion aktualisieren damit der zustand geändert wird
+}
+
+//---------------------Event Einagefeld-------------------------
+
+document.addEventListener("DOMContentLoaded", function() {
+  Array.prototype.slice
+    .call(document.querySelectorAll(".selektor1"))
+    .forEach(function(article) {
+      const Eingabewert = article.querySelector('[name="w"]');
+
+      function eingeben(event) {
+        
+        // ToDo Bedingung Einfügen. Wenn die Variable gewählt wurde nur dann Eingabe speichern.
+        // ersterClick = 999; // 999-kein Objekt 1-Variable
+       // if(ersterClick == 1 && zweiterClick==999)
+       // {
+          wert = Eingabewert.value;
+          eingabeErfolgt = true;
+        // ToDo ... Hier kommt noch Aktion bei der Eingabe
+        // console.log("Eingabewert= " + Eingabewert.value);
+      //  }
+      }
+      article.addEventListener("input", eingeben);
+    });
+});
+
+// --------------------Event mittels Enter-Taste------------------------
+function emptyfield() {
+  // Funktion zum Löschen des Eingabefeldes
+  document.getElementById("w").value = "";
+}
+
+// Get the input field
+var input = document.getElementById("w");
+
+// Execute a function when the user releases a key on the keyboard
+input.addEventListener("keyup", function(event) {
+  // Number 13 is the "Enter" key on the keyboard
+  if (event.keyCode === 13) {
+    // Cancel the default action, if needed
+    event.preventDefault();
+    emptyfield(); // Eingabefeld löschen
+    // Trigger the button element with a click
+    document.getElementById("btn1").click();
+    return false;
+  }
+});
+//----------------------Event beim Buttonklick------------------------
+
+function eingabe() {
+  console.log("Eingabewert= " + wert);
+
+  Main();
+  /*
+  if(state==2)
+    {
+      
+      state=3;
+    }
+  */
+  // ToDo ... Hier kommt noch aktion beim ButtonKlick
+  // Eventuell muss Canvas neugezeichnet werden
+}
+
+/*
+//----------------Evbent beim Bewegen der Maus-------
+function MausBewegungsHandlerOnMouseMove(event) 
+{
+
+    let x_temp = event.pageX;
+    let y_temp = event.pageY; 
+    x_Koordinate = x_temp-8;                                                                           // x-Koordinate des Mauszeigers auslesen
+    y_Koordinate = y_temp-68;
+    T1.speechBubble("x=" + (x_Koordinate) + ", y=" + (y_Koordinate), 1000, 150);// y-Koordinate des Mauszeigers auslesen
+    //console.log("x= " + x_Koordinate + ", y= " + y_Koordinate);      
+    //Main();
+}
+
+*/
+
+// ==========================Funktionen===================================================
+
+// ----------------------------------Hauptfunktion-------------------------------------
+
+function Main() {
+  switch (state) {
+    // --------------------- state=1 - Zeiger auswählen -------------------
+    case 1:
+      if (AufgabenNr == "1") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T1.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls ein Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T1.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T1.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T1.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "2") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T2.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T2.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T2.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T2.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "3") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T3.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T3.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T3.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T3.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "4") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T4.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T4.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T4.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T4.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "5") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T5.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T5.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T5.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T5.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "6") {
+        
+        wert = 0;
+        eingabeErfolgt = false;
+        
+        if (T6.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 0) {
+          // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+          state = 2;
+          substate = 1;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T6.TextausgabeFensterLoeschen();
+          Main();
+        }
+        if (T6.ZeigerAnklickenPfeilNehmen(x_Koordinate, y_Koordinate) == 1) {
+          // Falls eineVariable richtig getroffen, zum nächsten Zustand gehen
+          ersterClick = 1; // 999-kein Objekt 1-Variable
+
+          state = 2;
+          substate = 2;
+          x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+          y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+          T6.TextausgabeFensterLoeschen();
+          Main();
+        }
+      }
+
+      // ToDo restliche Aufgaben Implementieren ...
+      break;
+
+    // --------------- state=2 - Variable oder Zeiger auswählen auf den/die Zeiger zeigt ----------------
+    case 2:
+      switch (substate) {
+        case 1: // Falls Zeigen angeklickt wird
+          if (AufgabenNr == "1") {
+            if (
+              T1.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+
+              Main();
+            }
+            if (
+              T1.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "2") {
+            if (
+              T2.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+            if (
+              T2.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "3") {
+            if (
+              T3.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+            if (
+              T3.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "4") {
+            if (
+              T4.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+            if (
+              T4.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "5") {
+            if (
+              T5.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+            if (
+              T5.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "6") {
+            if (
+              T6.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 0
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+            if (
+              T6.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) == 1
+            ) {
+              // Falls den Zeiger richtig getroffen, zum nächsten Zustand gehen
+              state = 3;
+              x_Koordinate = 0; // x - Koordinate des onClick-Events zurücksetzen
+              y_Koordinate = 0; // y - Koordinate des onClick-Events zurücksetzen
+              Main();
+            }
+          }
+
+          // ToDo: weitere Aufgabe implementieren...
+
+          break;
+
+        case 2: // Falls Variable angeklickt wird, soll zunächst ein Wert eingegeben werden oder wenn zwei Variablen angeklickt, dann falscher Versuch
+          if (AufgabenNr == "1") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T1.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T1.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T1.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T1.AktuellenZustandReseten();
+              T1.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T1.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "2") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T2.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T2.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T2.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T2.AktuellenZustandReseten();
+              T2.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T2.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "3") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T3.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T3.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T3.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T3.AktuellenZustandReseten();
+              T3.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T3.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          }
+
+          if (AufgabenNr == "4") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T4.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T4.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T4.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T4.AktuellenZustandReseten();
+              T4.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T4.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          } // ToDo: weitere Aufgabe implementieren...
+
+          if (AufgabenNr == "5") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T5.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T5.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T5.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T5.AktuellenZustandReseten();
+              T5.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T5.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          } // ToDo: weitere Aufgabe implementieren...
+
+          if (AufgabenNr == "6") {
+            console.log("state = 2.2 (Werteingabe)");
+            if (
+              (ersterClick == 1 &&
+                T6.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  1) ||
+              (ersterClick == 1 &&
+                T6.ElementAnklickenPfeilAbsetzen(x_Koordinate, y_Koordinate) ==
+                  0)
+            ) {
+              //falscher Versuch
+              ersterClick = 999; // 999-kein Objekt 1-Variable  zurückzetzen
+              x_Koordinate = 0;
+              y_Koordinate = 0;
+              T6.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+
+              state = 1;
+              T6.AktuellenZustandReseten();
+              T6.ZeichneZeile();
+              Main();
+            }
+
+            if (eingabeErfolgt) {
+              T6.WertEingeben(wert); // Der Wert wird eingetragen zum weiteren vergleich
+              console.log("     " + wert);
+              state = 3;
+
+              wert = 0; // den Wert zurücksetzen                                                             // ?
+              eingabeErfolgt = 0; // ?
+              Main();
+            }
+          }
+
+          break;
+      }
+
+      break;
+
+    // state=3 - Eingaben prüfen
+    case 3:
+      console.log("state = 3");
+
+      if (AufgabenNr == "1") {
+        if (T1.istSpielende() && T1.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T1.CanvasLoeschen();
+          T1.ZeichneQuellcodePfeil(schritt_nummer);
+          T1.ZeichneQuellcode();
+          T1.ZeichneZeile();
+          T1.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          console.log("  ENDE   ");
+          // ToDo ...
+        } else if (T1.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T1.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T1.CanvasLoeschen();
+          T1.ZeichneQuellcodePfeil(schritt_nummer);
+          T1.ZeichneQuellcode();
+          T1.ZeichneZeile();
+          T1.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T1.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T1.AktuellenZustandReseten();
+          T1.ZeichneZeile();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "2") {
+        if (T2.istSpielende() && T2.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T2.CanvasLoeschen();
+          T2.ZeichneQuellcodePfeil(schritt_nummer);
+          T2.ZeichneQuellcode();
+          T2.ZeichneZeile();
+          T2.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          //T1 = new SpielT(text_1, text_1.length, zustaende, 6, MausBewegungsHandlerOnClick); //?
+          console.log("  ENDE   ");
+          // ToDo ...
+        } else if (T2.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T2.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T2.CanvasLoeschen();
+          T2.ZeichneQuellcodePfeil(schritt_nummer);
+          T2.ZeichneQuellcode();
+          T2.ZeichneZeile();
+          T2.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T2.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T2.AktuellenZustandReseten();
+          T2.ZeichneZeile();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "3") {
+        if (T3.istSpielende() && T3.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T3.CanvasLoeschen();
+          T3.ZeichneQuellcodePfeil(schritt_nummer);
+          T3.ZeichneQuellcode();
+          T3.ZeichneZeile();
+          T3.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          state = 4;
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          //T1 = new SpielT(text_1, text_1.length, zustaende, 6, MausBewegungsHandlerOnClick); //?
+          console.log("  ENDE   ");
+
+          // ToDo ...
+        } else if (T3.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T3.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T3.CanvasLoeschen();
+          T3.ZeichneQuellcodePfeil(schritt_nummer);
+          T3.ZeichneQuellcode();
+          T3.ZeichneZeile();
+          T3.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T3.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T3.AktuellenZustandReseten();
+          T3.ZeichneZeile();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "4") {
+        if (T4.istSpielende() && T4.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T4.CanvasLoeschen();
+          T4.ZeichneQuellcodePfeil(schritt_nummer);
+          T4.ZeichneQuellcode();
+          T4.ZeichneZeile();
+          T4.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          state = 4;
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          //T1 = new SpielT(text_1, text_1.length, zustaende, 6, MausBewegungsHandlerOnClick); //?
+          console.log("  ENDE   ");
+
+          // ToDo ...
+        } else if (T4.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T4.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T4.CanvasLoeschen();
+          T4.ZeichneQuellcodePfeil(schritt_nummer);
+          T4.ZeichneQuellcode();
+          T4.ZeichneZeile();
+          T4.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T4.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T4.AktuellenZustandReseten();
+          T4.ZeichneZeile();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "5") {
+        if (T5.istSpielende() && T5.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T5.CanvasLoeschen();
+          T5.ZeichneQuellcodePfeil(schritt_nummer);
+          T5.ZeichneQuellcode();
+          T5.ZeichneZeile();
+          T5.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          state = 4;
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          //T1 = new SpielT(text_1, text_1.length, zustaende, 6, MausBewegungsHandlerOnClick); //?
+          console.log("  ENDE   ");
+
+          // ToDo ...
+        } else if (T5.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T5.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T5.CanvasLoeschen();
+          T5.ZeichneQuellcodePfeil(schritt_nummer);
+          T5.ZeichneQuellcode();
+          T5.ZeichneZeile();
+          T5.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T5.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T5.AktuellenZustandReseten();
+          T5.ZeichneZeile();
+          Main();
+        }
+      }
+
+      if (AufgabenNr == "6") {
+        if (T6.istSpielende() && T6.EingabePruefen()) {
+          // Wenn die Aufgabe vollständig gelöst ist ..
+          T6.CanvasLoeschen();
+          T6.ZeichneQuellcodePfeil(schritt_nummer);
+          T6.ZeichneQuellcode();
+          T6.ZeichneZeile();
+          T6.TextausgabeFenster("Sehr gut! Sie haben die Aufgabe gelöst!"); // ToDo: es wird nit ausgegeben!
+          state = 4;
+          // Alle Variablen werden in die Ausgangssituation zurückgesetzt:
+          AllesZuruecksetzen();
+          //T1 = new SpielT(text_1, text_1.length, zustaende, 6, MausBewegungsHandlerOnClick); //?
+          console.log("  ENDE   ");
+
+          // ToDo ...
+        } else if (T6.EingabePruefen()) {
+          // Wenn die Eingaben richtig sind, Übergang zu nächsten Zeile
+          state = 1; // Zum State 1 gehen
+          substate = 0;
+          T6.ZustaendeKopieren();
+          schritt_nummer = schritt_nummer + 1; // Position des Pfeils in dem Quellcode verschieben
+          T6.CanvasLoeschen();
+          T6.ZeichneQuellcodePfeil(schritt_nummer);
+          T6.ZeichneQuellcode();
+          T6.ZeichneZeile();
+          T6.TextausgabeFenster("Richtig ! Sehr gut!");
+        } else {
+          T6.TextausgabeFenster("Falsch! Bitte versuchen Sie es noch mal.");
+          // ToDo ..
+
+          state = 1;
+          T6.AktuellenZustandReseten();
+          T6.ZeichneZeile();
+          Main();
+        }
+      }
+
+      // ToDo: Weitere Aufgaben einfügen
+      break;
+
+    case 4:
+      break;
+  }
+}
+
+//---------------------------------------------------------------------------------------
+
+function Switch_Aufgabenauswahl(Nr) {
+  switch (
+    Nr // Spielauswahl:
+  ) {
+    case "1":
+      T1 = new SpielT(
+        text_1,
+        text_1.length,
+        zustaende,
+        iMax1,
+        MausBewegungsHandlerOnClick
+      );
+      T1.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T1.ZeichneQuellcode();
+      T1.ZeichneZeile();
+      schritt_nummer = 2;
+      T1.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+
+    case "2":
+      T2 = new SpielT(
+        text_2,
+        text_2.length,
+        zustaende2,
+        iMax2,
+        MausBewegungsHandlerOnClick
+      );
+      T2.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T2.ZeichneQuellcode();
+      T2.ZeichneZeile();
+      schritt_nummer = 2;
+      T2.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+
+    case "3":
+      T3 = new SpielT(
+        text_3,
+        text_3.length,
+        zustaende3,
+        iMax3,
+        MausBewegungsHandlerOnClick
+      );
+      T3.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T3.ZeichneQuellcode();
+      T3.ZeichneZeile();
+      schritt_nummer = 2;
+      T3.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+
+    case "4":
+      T4 = new SpielT(
+        text_4,
+        text_4.length,
+        zustaende4,
+        iMax4,
+        MausBewegungsHandlerOnClick
+      );
+      T4.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T4.ZeichneQuellcode();
+      T4.ZeichneZeile();
+      schritt_nummer = 2;
+      T4.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+
+    case "5":
+      T5 = new SpielT(
+        text_5,
+        text_5.length,
+        zustaende5,
+        iMax5,
+        MausBewegungsHandlerOnClick
+      );
+      T5.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T5.ZeichneQuellcode();
+      T5.ZeichneZeile();
+      schritt_nummer = 2;
+      T5.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+
+    case "6":
+      T6 = new SpielT(
+        text_6,
+        text_6.length,
+        zustaende6,
+        iMax6,
+        MausBewegungsHandlerOnClick
+      );
+      T6.CanvasLoeschen();
+      AllesZuruecksetzen();
+      T6.ZeichneQuellcode();
+      T6.ZeichneZeile();
+      schritt_nummer = 2;
+      T6.ZeichneQuellcodePfeil(schritt_nummer);
+      break;
+      
+    case "7":
+      T1 = new SpielT(
+        text_7,
+        text_7.length,
+        zustaende7,
+        6,
+        MausBewegungsHandlerOnClick
+      );
+      break;
+    case "8":
+      T1 = new SpielT(
+        text_8,
+        text_8.length,
+        zustaende8,
+        6,
+        MausBewegungsHandlerOnClick
+      );
+      break;
+    case "9":
+      T1 = new SpielT(
+        text_9,
+        text_9.length,
+        zustaende9,
+        6,
+        MausBewegungsHandlerOnClick
+      );
+      break;
+    case "10":
+      T1 = new SpielT(
+        text_10,
+        text_10.length,
+        zustaende10,
+        6,
+        MausBewegungsHandlerOnClick
+      );
+      break;
+
+    default:
+      console.log("default");
+  }
+}
+
+//-----------------------------------------------------------------------------------
+function AllesZuruecksetzen() {
+  //var state = 0;                       // Beim ersten Start Zustand = 0
+  var state = 1; // Beim ersten Start Zustand = 1
+  var substate = 0;
+  var schritt_nummer = 2; // Im Quellcodefenster: Position des Pfeils auf aktuelle Zeile
+  let x_Koordinate = 0; // angecklikte x- Koordinate der Maus
+  let y_Koordinate = 0; // angecklikte y- Koordinate der Maus
+  //let AufgabenNr = 1;                 // Variable für aktuelle Aufgabe
+  let eingabeArt = 999; // =0 Variable, =1 Wert, =999 noch nicht ausgewählt
+  let wert = 0;
+  let eingabeErfolgt = false;
+  let ersterClick = 999; // 999-kein Objekt 1-Variable
+  let zweiterClick = 999; // 999-kein Objekt 1-Variable
+}
+//-----------------------------------------------------------------------------------
+
+//---------------------------------Wird nicht verwendet--------------------------------------------------
+
+//-----------------------------Elemente einblenden--------------------------------
+// Mit show_elements() können einzelne oder mehrere Elemente
+// via show_elements('ElementID1','ElementID2','ElementID3'...)
+// eingeblendet werden.
+// Quelle: http://gedit.net/Artikel;Elemente_anzeigen_und_verbergen_mit_Javascript#Kundennummer_Hilfe
+
+function show_elements() {
+  var elementNames = this.show_elements.arguments;
+  for (var i = 0; i < elementNames.length; i++) {
+    var elementName = elementNames[i];
+    document.getElementById(elementName).style.display = "block";
+  }
+}
+
+// ---------------------------Elemente ausblenden-----------------------------------
+// Mit hide_elements() können einzelne oder mehrere Elemente
+// via hide_elements('ElementID1','ElementID2','ElementID3'...)
+// ausgeblendet werden.
+// Quelle: http://gedit.net/Artikel;Elemente_anzeigen_und_verbergen_mit_Javascript#Kundennummer_Hilfe
+
+function hide_elements() {
+  var elementNames = this.hide_elements.arguments;
+  for (var i = 0; i < elementNames.length; i++) {
+    var elementName = elementNames[i];
+    document.getElementById(elementName).style.display = "none";
+  }
+}
+
+//---------------------------------------------------------------------------------------
+
+</script>
+
+
+
+    
+  <!----------------------- deaktiviert neuladen der Seite nach der Eingabe per Enter Taste ------------------------------> 
+  <!-------------------------Quelle: https://www.mikrocontroller.net/topic/493678--------------------------------------> 
+        <script type="text/javascript"> 
+
+        function disableEnterKey(evt) { 
+
+          var evt = (evt) ? evt : ((event) ? event : null); 
+
+          var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
+
+          if ((evt.keyCode == 13) && (node.type=="text"))  {return false;} 
+
+        } 
+
+        document.onkeypress = disableEnterKey; 
+
+        </script>
+   
+
+    
+    <p style="text-align: right;"> <small> Hochschule Hamm-Lippstadt, Studiengang Mechatronik, 2021 </small> </p>
+  </body>
+</html>

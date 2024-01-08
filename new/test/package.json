@@ -1,6 +1,9 @@
 
-{
-  "scripts": {
-    "test": "jest"
+  {
+    "scripts": {
+      "test": "jest"
+    },
+    "jest": {
+      "testEnvironment": "jsdom"
+    }
   }
-}

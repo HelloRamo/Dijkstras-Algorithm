@@ -101,7 +101,7 @@ describe('dijkstra', () => {
     });
 });
 */
-
+/*
 const PriorityQueue = require('G:\Andere Computer\Mein PC\FH STUDIUM + Arbeit\Bachelor_Dijkstra\code\git\Dijkstras-Algorithm\new\pq.js'); // Pfad zur Datei, die PriorityQueue enthält
 
 describe('PriorityQueue', () => {
@@ -130,5 +130,152 @@ describe('PriorityQueue', () => {
     test('isEmpty gibt false zurück, wenn die Warteschlange nicht leer ist', () => {
         pq.enqueue('A', 2);
         expect(pq.isEmpty()).toBe(false);
+    });
+});
+*/
+/*
+const PriorityQueue = require('./pq'); // Pfad zur Datei, die PriorityQueue enthält
+
+test('printQueue gibt die Elemente der Warteschlange in der richtigen Reihenfolge aus', () => {
+    const pq = new PriorityQueue();
+    pq.enqueue('A', 2);
+    pq.enqueue('B', 1);
+    pq.enqueue('C', 3);
+
+    const consoleSpy = jest.spyOn(console, 'log');
+
+    pq.printQueue();
+
+    expect(consoleSpy).toHaveBeenCalledWith('B 1');
+    expect(consoleSpy).toHaveBeenCalledWith('A 2');
+    expect(consoleSpy).toHaveBeenCalledWith('C 3');
+
+    consoleSpy.mockRestore();
+});
+*/
+/*
+describe('dijkstra', () => {
+    it('should calculate the shortest distances from the start node to all other nodes', () => {
+        const startNode = 'A';
+        const result = dijkstra(startNode);
+
+        expect(result.distances).toEqual({
+            A: 0,
+            B: 1,
+            C: 1,
+            D: 1,
+            E: 2,
+            F: 1
+        });
+    });
+    
+});
+
+*/
+
+/*
+describe('validateInput', () => {
+    let promptSpy;
+    let alertSpy;
+    let getElementByIdSpy;
+
+    beforeEach(() => {
+        promptSpy = jest.spyOn(window, 'prompt');
+        alertSpy = jest.spyOn(window, 'alert');
+        getElementByIdSpy = jest.spyOn(document, 'getElementById');
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it('should validate user input and update userAnswers object and DOM elements', () => {
+        const startNode = 'A';
+        const result = dijkstra('A');
+        const correctDistances = result.distances;
+        const userAnswers = { 'A': 0 };
+
+        promptSpy.mockReturnValueOnce('1');
+        promptSpy.mockReturnValueOnce('2');
+        promptSpy.mockReturnValueOnce('1');
+        promptSpy.mockReturnValueOnce('2');
+        promptSpy.mockReturnValueOnce('3');
+
+        validateInput();
+
+        expect(promptSpy).toHaveBeenCalledTimes(5);
+        expect(alertSpy).toHaveBeenCalledTimes(2);
+        expect(getElementByIdSpy).toHaveBeenCalledTimes(3);
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToB');
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToC');
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToD');
+        expect(userAnswers).toEqual({
+            'A': 0,
+            'B': '1',
+            'C': '2',
+            'D': '1',
+            'E': '2',
+        });
+        expect(alertSpy).toHaveBeenCalledWith('Richtig! Die kürzeste Distanz zum Knoten B beträgt 1.');
+        expect(alertSpy).toHaveBeenCalledWith('Richtig! Die kürzeste Distanz zum Knoten C beträgt 2.');
+    });
+
+    it('should continue prompting user until correct input is provided', () => {
+        const startNode = 'A';
+        const result = dijkstra('A');
+        const correctDistances = result.distances;
+        const userAnswers = { 'A': 0 };
+
+        promptSpy.mockReturnValueOnce('2');
+        promptSpy.mockReturnValueOnce('3');
+        promptSpy.mockReturnValueOnce('4');
+        promptSpy.mockReturnValueOnce('2');
+        promptSpy.mockReturnValueOnce('3');
+
+        validateInput();
+
+        expect(promptSpy).toHaveBeenCalledTimes(5);
+        expect(alertSpy).toHaveBeenCalledTimes(2);
+        expect(getElementByIdSpy).toHaveBeenCalledTimes(3);
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToB');
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToC');
+        expect(getElementByIdSpy).toHaveBeenCalledWith('distanceToD');
+        expect(userAnswers).toEqual({
+            'A': 0,
+            'B': '2',
+            'C': '3',
+            'D': '2',
+            'E': '3',
+        });
+        expect(alertSpy).toHaveBeenCalledWith('Falsch für Knoten B. Versuchen Sie es erneut.');
+        expect(alertSpy).toHaveBeenCalledWith('Falsch für Knoten C. Versuchen Sie es erneut.');
+    });
+});
+*/
+/**
+ * @jest-environment jsdom
+ */
+
+// import '@testing-library/jest-dom'
+const { validateInput } = require('./pq'); // Pfad zur Datei, die validateInput enthält
+// const { screen } = require('@testing-library/jest-dom-main');
+
+describe('validateInput', () => {
+    test('fügt ein Element zum DOM hinzu, wenn die Eingabe gültig ist', () => {
+        document.body.innerHTML = `<div id="distanceTo"></div>`;
+
+        const input = 'A'; // Ersetzen Sie dies durch eine gültige Eingabe
+        validateInput(input);
+
+        expect(screen.getByText(input)).toBeInTheDocument();
+    });
+
+    test('fügt kein Element zum DOM hinzu, wenn die Eingabe ungültig ist', () => {
+        document.body.innerHTML = `<div id="distanceTo"></div>`;
+
+        const input = 'Z'; // Ersetzen Sie dies durch eine ungültige Eingabe
+        validateInput(input);
+
+        expect(screen.queryByText(input)).not.toBeInTheDocument();
     });
 });
